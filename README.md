@@ -1,19 +1,11 @@
 <p align="center">
-<img align="center" width="600" src="https://i.gyazo.com/c45881d46eeef83e03634a6a251ab849.png">
+<img align="center" width="600" src="https://i.imgur.com/7d78UK8.png">
 </p>
 
-# Luxart Vehicle Control v3
-Over the past months, I have been slowing integrating additonal features into Faction's release (v2.0) of Lt. Caine's Luxart Vehicle Control resource, I would now like to release these to the public. 
-
-Introduction Video: https://youtu.be/XO5K7iISOh0 (out-of-date)
-
-Installation Video: https://youtu.be/YVm3yYxdm48 (out-of-date)
-
-Community Upgrade Guides: https://drive.google.com/drive/folders/1trjNXnpmlh_5Q5syXESjwSODdFOFXBdE?usp=sharing
-
+# Luxart Vehicle Control: Fleet
 ## Additional Functionality:
 
-__LuxHUD:__ 
+__HUD:__ 
 A small togglable and adjustable visual representation of the scripts functionality modeled after real siren controllers. Includes 3 position switch, siren, horn, takedown, and lockout textures. Includes ability to move and save location and opacity of HUD. 
 <p align="center">
 <img align="center" width="530" src="https://cdn.discordapp.com/attachments/749048472073666641/820404142841004062/LVC_HUD_v2_copy.png">
@@ -47,7 +39,7 @@ __Hazards Delay & SoundFX:__
 Customizable "Hold-to-activate/deactivate" hazard lights to prevent accidental activation when navigating trainers/vMenu. Added activation/deactivation sound effect of toggle switch based off IRL vehicle toggle switches.
 
 ## How to install:
-1. Visit: [Wiki - Installation](https://github.com/TrevorBarns/luxart-vehicle-control/wiki/Installation)
+1. Visit: [Wiki - Installation](https://github.com/TrevorBarns/luxart-vehicle-control-fleet/wiki/Installation)
 
 ## Credits:
 Luxart Vehicle Control was an ingenious creation by __Lt. Caine__! Thank you! 
