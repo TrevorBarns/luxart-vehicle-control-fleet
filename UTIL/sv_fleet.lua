@@ -32,7 +32,6 @@ end)
 
 RegisterServerEvent('lvc:SetLxSirenState_s')
 AddEventHandler('lvc:SetLxSirenState_s', function(newstate, vcfid, mode)
-	print('SirenReq', source, newstate)
 	TriggerClientEvent('lvc:SetLxSirenState_c', -1, source, newstate, vcfid, mode)
 end)
 
@@ -90,7 +89,7 @@ end)
 
 CreateThread( function()
 -- Get LVC repo version from github
-	PerformHttpRequest('https://raw.githubusercontent.com/TrevorBarns/luxart-vehicle-control/master/version', function(err, responseText, headers)
+	PerformHttpRequest('https://raw.githubusercontent.com/TrevorBarns/luxart-vehicle-control-fleet/main/version', function(err, responseText, headers)
 		if responseText ~= nil and responseText ~= '' then
 			repo_version = responseText
 		end
@@ -119,8 +118,8 @@ CreateThread( function()
 	print('\t|\t^8   \\____/uxart   ^7\\_/ ehicle ^9\\____/ontrol         ^7|')
 	print('\t|\t^4               FLEET EDITION                     ^7|')
 	print(('\t|\t            COMMUNITY ID: %-23s|'):format(community_id))
-	print('\t|\t         INSTALLED VERSION: '..curr_version..'                |')
-	print('\t|\t           LATEST VERSION:  '..repo_version..'                |')
+	print(('\t|\t         INSTALLED VERSION: %-21s|'):format(curr_version))
+	print(('\t|\t           LATEST VERSION:  %-21s|'):format(repo_version))
 	if GetResourceState('lux_vehcontrol') ~= 'started' and GetResourceState('lux_vehcontrol') ~= 'starting' then
 		if GetCurrentResourceName() == 'lvc_fleet' then
 			if community_id ~= nil and community_id ~= '' then
@@ -137,7 +136,8 @@ CreateThread( function()
 						print('\t|^3 THIS VERSION IS IN DEVELOPMENT AND IS NOT RECOMMENDED  ^7|')
 						print('\t|^3 FOR PRODUCTION USE. IF THIS WAS A MISTAKE DOWNLOAD THE ^7|')
 						print('\t|^3 LATEST STABLE RELEASE AT:                              ^7|')
-						print('\t|^2 github.com/TrevorBarns/luxart-vehicle-control/releases ^7|')
+						print('\t|^2 github.com/TrevorBarns/luxart-vehicle-control-fleet    ^7|')
+						print('\t|^2 /releases                                              ^7|')
 						print('\t|^3 TO MUTE THIS: SET CONVAR \'experimental\' to \'true\'      ^7|')
 					end
 				end
