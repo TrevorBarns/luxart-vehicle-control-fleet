@@ -1,3 +1,4 @@
+## :warning: This resource is not yet released and in development. Support will not be provided. :warning:
 <p align="center">
 <img align="center" width="600" src="https://i.imgur.com/7d78UK8.png">
 </p>
