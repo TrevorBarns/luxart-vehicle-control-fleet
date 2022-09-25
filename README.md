@@ -1,3 +1,5 @@
+## :warning: This resource is not yet released and in development.:warning:
+## :rotating_light: Support will not be provided. :rotating_light:
 <p align="center">
 <img align="center" width="600" src="https://i.imgur.com/7d78UK8.png">
 </p>
