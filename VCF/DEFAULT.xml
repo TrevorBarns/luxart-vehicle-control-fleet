@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- LVC VEHICLE CONFIGURATION FILE -->
+<vcfroot Faction="LEO" Author="TrevorBarns" >
+	<!-- HORN AND SIREN TONES -->
+	<TONES>
+		<HORNS>
+		<!--1-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
+			<HORN Name="AIRHORN" 	Option="1"	ResidentString=	"SIRENS_AIRHORN"
+												String=			"" 		Ref=	"" 	Bank= ""
+												RumblerString=	""	RumblerRef=	"" 	RumblerBank=""/>
+		<!----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
+		</HORNS>
+		<SIRENS>
+		<!--1-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
+			<SIREN Name="WAIL" 		Option="1"	ResidentString=	"VEHICLES_HORNS_SIREN_1"
+												String=			"" 		Ref=	"" 	Bank= ""
+												RumblerString=	""	RumblerRef=	"" 	RumblerBank=""/>
+		<!--2-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
+			<SIREN Name="YELP" 		Option="1"	ResidentString=	"VEHICLES_HORNS_SIREN_2"
+												String=			"" 		Ref=	"" 	Bank= ""
+												RumblerString=	""	RumblerRef=	"" 	RumblerBank=""/>
+		<!--3-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->						
+			<SIREN Name="PRIORITY" 	Option="1"	ResidentString=	"VEHICLES_HORNS_POLICE_WARNING"
+												String=			"" 	Ref=		"" 	Bank= ""
+												RumblerString=	""	RumblerRef=	"" 	RumblerBank=""/>
+		<!----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
+		</SIRENS>
+	</TONES>
+	<!-- SIREN OPTIONS -->	
+	<SIREN_CONFIG>
+		<Horn ToneID="1"/>
+		<Primary_Manual ToneID="1"/>
+		<Secondary_Manual ToneID="2"/>
+		<Auxiliary ToneID="1"/>
+		<Airhorn_Intrp Enabled="true"/>
+		<Reset_Standby Enabled="true"/>
+		<Park_Kill Enabled="true"/>
+		<Peer_Override Enabled="false"/>
+		<Local_Override Enabled="true"/>
+		<Rumbler Enabled="false"/>
+	</SIREN_CONFIG>
+	<!-- HUD SETTINGS -->	
+	<HUD Enabled="true" Backlight_Mode="1"/>
+	<!-- AUDIO Settings -->
+	<AUDIO>
+		<Radio Enabled="true"/>				
+		<Airhorn_SFX Enabled="false"/>
+		<Manual_SFX Enabled="false"/>
+		<Hazards_SFX Enabled="true"/>
+		<Activity_Reminder_Interval_Index Val="1"/>
+		<Scheme_Index Val="1"/>
+		<SCHEMES>
+			<SCHEME String="SSP2000"/>
+			<SCHEME String="SSP3000"/>
+			<SCHEME String="Cencom"/>
+			<SCHEME String="ST300"/>
+			<SCHEME String="Code3-MCB"/>
+		</SCHEMES>
+		<On_Volume Val="0.5"/>
+		<Off_Volume Val="0.7"/>
+		<Upgrade_Volume Val="0.5"/>
+		<Downgrade_Volume Val="0.7"/>
+		<Hazards_Volume Val="0.09"/>
+		<Lock_Volume Val="0.25"/>
+		<Lock_Reminder_Volume Val="0.2"/>
+		<Activity_Reminder_Volume Val="0.09"/>
+	</AUDIO>
+	<!-- MENU PERMISSIONS -->
+	<MENU>
+		<Menu_Access Enabled='true'/>
+		<Menu_Main_Siren_Settings Enabled="true"/>
+		<Toggle_Peer_Override Enabled="false"/>	
+		<Toggle_Local_Override Enabled="false"/>
+		<Toggle_Airhorn_Intrp Enabled="true"/>
+		<Toggle_Reset_Standby Enabled="true"/>
+		<Custom_Tone_Options Enabled="true"/>
+		<Custom_Manual Enabled="true"/>
+		<Custom_Auxiliary Enabled="true"/>
+		<Toggle_Park_Kill Enabled="true"/>
+		<Menu_HUD_Settings Enabled="true"/>
+		<Toggle_HUD Enabled="true"/>
+		<Custom_Backlight_Mode Enabled="true"/>
+		<Menu_Audio_Settings Enabled="true"/>
+		<Toggle_Radio Enabled="true"/>
+		<Custom_Scheme Enabled="true"/>
+		<Toggle_Clicks Enabled="true"/>
+		<Custom_Activity_Reminder Enabled="true"/>
+		<Menu_Plugins Enabled="true"/>
+	</MENU>
+	<PLUGINS>
+
+	</PLUGINS>
+</vcfroot>
