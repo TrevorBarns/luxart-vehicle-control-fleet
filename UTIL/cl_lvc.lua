@@ -593,11 +593,11 @@ AddEventHandler('lvc:SetLxSirenState_c', function(sender, newstate, vcfid, mode)
 						UTIL:Print(("using parallel %s, %s, %s").format(newstate, VCF_ID, mode))
 						SetLxSirenStateForVeh(veh, newstate, VCF_ID, mode)
 					--parallel not found, is fallback assigned, otherwise play peers 
-					elseif SIRENS[newstate] ~= nil then
+					elseif SIRENS[fallback] ~= nil then
 						UTIL:Print('using fallback')
 						SetLxSirenStateForVeh(veh, fallback, VCF_ID, mode)
 					else
-						pUTIL:Print('using peers all fail')
+						UTIL:Print('using peers all fail')
 						SetLxSirenStateForVeh(veh, newstate, vcfid, mode)
 					end
 				else
@@ -626,7 +626,7 @@ AddEventHandler('lvc:SetAuxilaryState_c', function(sender, newstate, vcfid, mode
 					local fallback = VCFs[vcfid].SIRENS[newstate].Fallback
 					if SIRENS[newstate] ~= nil then
 						SetAuxiliaryStateForVeh(veh, newstate, VCF_ID, mode)
-					elseif fallback ~= nil then
+					elseif SIRENS[fallback] ~= nil then
 						SetAuxiliaryStateForVeh(veh, fallback, VCF_ID, mode)
 					else
 						SetAuxiliaryStateForVeh(veh, newstate, vcfid, mode)
@@ -641,7 +641,7 @@ end)
 
 ---------------------------------------------------------------------
 RegisterNetEvent('lvc:SetAirManuState_c')
-AddEventHandler('lvc:SetAirManuState_c', function(sender, newstate, vcfid, horn, mode)
+AddEventHandler('lvc:SetAirManuState_c', function(sender, newstate, vcfid, using_horn, mode)
 	local player_s = GetPlayerFromServerId(sender)
 	local ped_s = GetPlayerPed(player_s)
 	if DoesEntityExist(ped_s) and not IsEntityDead(ped_s) then
@@ -654,21 +654,21 @@ AddEventHandler('lvc:SetAirManuState_c', function(sender, newstate, vcfid, horn,
 				end
 				local fallback = nil
 				if MCTRL:GetOverridePeerState() and VCFs[vcfid].LVC.faction == LVC.faction and newstate ~= 0 then
-					if horn then
+					if using_horn then
 						fallback = VCFs[vcfid].HORNS[newstate].Fallback or nil
 					else
 						fallback = VCFs[vcfid].SIRENS[newstate].Fallback or nil
 					end
 					
 					if SIRENS[newstate] ~= nil then
-						SetAirManuStateForVeh(veh, newstate, VCF_ID, horn, mode)
-					elseif fallback ~= nil then
-						SetAirManuStateForVeh(veh, fallback, VCF_ID, horn, mode)
+						SetAirManuStateForVeh(veh, newstate, VCF_ID, using_horn, mode)
+					elseif fallback ~= nil and (HORNS[fallback] ~= nil or SIRENS[fallback] ~= nil) then
+						SetAirManuStateForVeh(veh, fallback, VCF_ID, using_horn, mode)
 					else
-						SetAirManuStateForVeh(veh, newstate, vcfid, horn, mode)
+						SetAirManuStateForVeh(veh, newstate, vcfid, using_horn, mode)
 					end
 				else
-					SetAirManuStateForVeh(veh, newstate, vcfid, horn, mode)
+					SetAirManuStateForVeh(veh, newstate, vcfid, using_horn, mode)
 				end
 			end
 		end
