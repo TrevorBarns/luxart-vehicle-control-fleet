@@ -246,7 +246,7 @@ function STORAGE:LoadSettings(skip_vcf_id)
 				HUD:SetHudBacklightMode(hud_save_data['hud_backlight_mode'])
 			end
 			HUD:SetHudScale(hud_save_data['hud_scale'])
-			HUD:SetHudScale(hud_save_data['hud_pos'])
+			HUD:SetHudPosition(hud_save_data['hud_pos'])
 		end
 		UTIL:Print('^4LVC ^5STORAGE:  ^7loaded HUD data.')		
 	end
