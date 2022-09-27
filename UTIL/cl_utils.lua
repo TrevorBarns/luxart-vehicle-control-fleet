@@ -51,7 +51,8 @@ local profile = nil
 
 ---------------------------------------------------------------------
 --[[Return sub-table for sirens or plugin settings tables, given veh, and name of whatever setting.]]
-function UTIL:GetProfileFromTable(print_name, tbl, veh)
+function UTIL:GetProfileFromTable(print_name, tbl, veh, ignore_missing_default)
+	local ignore_missing_default = ignore_missing_default or false
 	local veh_name = GetDisplayNameFromVehicleModel(GetEntityModel(veh))
 	local lead_and_trail_wildcard = veh_name:gsub('%d+', '#')
 	local lead = veh_name:match('%d*%a+')
@@ -83,7 +84,9 @@ function UTIL:GetProfileFromTable(print_name, tbl, veh)
  			else
 				profile_table = { }
 				profile = false
-				UTIL:Print(('^3LVC(%s) WARNING: "DEFAULT" table missing from %s table. Using empty table for %s.'):format(STORAGE:GetCurrentVersion(), print_name, veh_name), true)
+				if not ignore_missing_default then
+					UTIL:Print(('^3LVC(%s) WARNING: "DEFAULT" table missing from %s table. Using empty table for %s.'):format(STORAGE:GetCurrentVersion(), print_name, veh_name), true)
+				end
 			end
 		end
 	else
