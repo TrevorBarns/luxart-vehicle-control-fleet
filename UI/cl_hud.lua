@@ -247,6 +247,7 @@ end
 --[[Sets NUI focus to false when right-click, esc, etc. are clicked.]]
 RegisterNUICallback( 'hud:setMoveState', function(state, cb)
 	SetNuiFocus(state, state)
+	STORAGE:SaveHUDSettings()
 end )
 
 ------------------------------------------------
