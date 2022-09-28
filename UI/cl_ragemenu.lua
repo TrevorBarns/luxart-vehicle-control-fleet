@@ -24,15 +24,15 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ---------------------------------------------------
 ]]
 
-RMenu.Add('lvc', 'main', RageUI.CreateMenu('Luxart Vehicle Control', 'Main Menu'))
-RMenu.Add('lvc', 'maintone', RageUI.CreateSubMenu(RMenu:Get('lvc', 'main'),'Luxart Vehicle Control', 'Main Siren Settings'))
-RMenu.Add('lvc', 'hudsettings', RageUI.CreateSubMenu(RMenu:Get('lvc', 'main'),'Luxart Vehicle Control', 'HUD Settings'))
-RMenu.Add('lvc', 'audiosettings', RageUI.CreateSubMenu(RMenu:Get('lvc', 'main'),'Luxart Vehicle Control', 'Audio Settings'))
-RMenu.Add('lvc', 'volumesettings', RageUI.CreateSubMenu(RMenu:Get('lvc', 'audiosettings'),'Luxart Vehicle Control', 'Audio Settings'))
-RMenu.Add('lvc', 'plugins', RageUI.CreateSubMenu(RMenu:Get('lvc', 'main'),'Luxart Vehicle Control', 'Plugins'))
-RMenu.Add('lvc', 'saveload', RageUI.CreateSubMenu(RMenu:Get('lvc', 'main'),'Luxart Vehicle Control', 'Storage Management'))
-RMenu.Add('lvc', 'copyprofile', RageUI.CreateSubMenu(RMenu:Get('lvc', 'saveload'),'Luxart Vehicle Control', 'Copy Profile Settings'))
-RMenu.Add('lvc', 'info', RageUI.CreateSubMenu(RMenu:Get('lvc', 'main'),'Luxart Vehicle Control', 'More Information'))
+RMenu.Add('lvc', 'main', RageUI.CreateMenu(' ', 'Main Menu', 0, 0, "lvc", "lvc_fleet_logo"))
+RMenu.Add('lvc', 'maintone', RageUI.CreateSubMenu(RMenu:Get('lvc', 'main'),' ', 'Main Siren Settings', 0, 0, "lvc", "lvc_fleet_logo"))
+RMenu.Add('lvc', 'hudsettings', RageUI.CreateSubMenu(RMenu:Get('lvc', 'main'),' ', 'HUD Settings', 0, 0, "lvc", "lvc_fleet_logo"))
+RMenu.Add('lvc', 'audiosettings', RageUI.CreateSubMenu(RMenu:Get('lvc', 'main'), ' ', 'Audio Settings', 0, 0, "lvc", "lvc_fleet_logo"))
+RMenu.Add('lvc', 'volumesettings', RageUI.CreateSubMenu(RMenu:Get('lvc', 'audiosettings'), ' ', 'Audio Settings', 0, 0, "lvc", "lvc_fleet_logo"))
+RMenu.Add('lvc', 'plugins', RageUI.CreateSubMenu(RMenu:Get('lvc', 'main'), ' ', 'Plugins', 0, 0, "lvc", "lvc_fleet_logo"))
+RMenu.Add('lvc', 'saveload', RageUI.CreateSubMenu(RMenu:Get('lvc', 'main'), ' ', 'Storage Management', 0, 0, "lvc", "lvc_fleet_logo"))
+RMenu.Add('lvc', 'copyprofile', RageUI.CreateSubMenu(RMenu:Get('lvc', 'saveload'), ' ', 'Copy Profile Settings', 0, 0, "lvc", "lvc_fleet_logo"))
+RMenu.Add('lvc', 'info', RageUI.CreateSubMenu(RMenu:Get('lvc', 'main'), ' ', 'More Information', 0, 0, "lvc", "lvc_fleet_logo"))
 RMenu:Get('lvc', 'main'):SetTotalItemsPerPage(13)
 RMenu:Get('lvc', 'maintone'):SetTotalItemsPerPage(15)
 RMenu:Get('lvc', 'volumesettings'):SetTotalItemsPerPage(12)
@@ -411,7 +411,7 @@ CreateThread(function()
 				--end
 				RageUI.Button('Move Mode', 'Move HUD position on screen. To exit ~r~right-click~s~ or hit "~r~Esc~s~".', {}, HUD.enabled, {
 					onSelected = function()
-						HUD:SetMoveMode(true, true)
+						HUD:SetMoveMode(true)
 					end,
 					});
 				RageUI.Slider('Scale', (HUD:GetHudScale()*4), 6, 0.2, 'Change opacity of of the HUD background rectangle.', false, {}, HUD.enabled, {
@@ -421,7 +421,7 @@ CreateThread(function()
 					end,
 				});
 				if MENU.custom_backlight_mode then
-					RageUI.List('Backlight', {'Auto', 'Off', 'On'}, HUD.backlight_mode, 'Changes HUD backlight behavior. ~b~Auto~s~ is determined by headlight state.', {}, true, {
+					RageUI.List('Backlight', {'Auto', 'Off', 'On'}, HUD.backlight_mode, 'Changes HUD backlight behavior. ~b~Auto~s~ is determined by headlight state.', {}, HUD.enabled, {
 					  onListChange = function(Index, Item)
 						HUD:SetHudBacklightMode(Index)
 					  end,
@@ -610,7 +610,7 @@ CreateThread(function()
 				  end,
 				})
 				RageUI.Separator('Advanced Settings')
-				RageUI.Button('Copy Settings', 'Copy profile settings from another vehicle.', {RightLabel = '→→→'}, #profiles > 0, {
+				RageUI.Button('Copy Settings', 'Copy profile settings from another vehicle. ~o~Coming soon to LVC:F.', {RightLabel = '→→→'}, false, {
 				}, RMenu:Get('lvc', 'copyprofile'))
 				RageUI.Button('Reset Settings', '~r~Reset LVC to it\'s default state, preserves existing saves. Will override any unsaved settings.', {RightLabel = confirm_r_msg}, true, {
 				  onSelected = function()
@@ -689,7 +689,7 @@ CreateThread(function()
 			------------------------------ABOUT MENU-----------------------------
 			---------------------------------------------------------------------
 			RageUI.IsVisible(RMenu:Get('lvc', 'info'), function()
-				RageUI.Button('Current Version', ('This server is running %s %s'):format(version_formatted, version_description), { RightLabel = version_formatted }, true, {
+				RageUI.Button('Current Version', ('This server is running %s%s'):format(version_formatted, version_description), { RightLabel = version_formatted }, true, {
 				  onSelected = function()
 				  end,
 				});
@@ -699,7 +699,11 @@ CreateThread(function()
 					end,
 					});
 				end
-				RageUI.Button('About / Credits', 'Originally designed and created by ~b~Lt. Caine~s~. ELS sound effects by ~b~Faction~s~. Version 3 expansion by ~b~Trevor Barns~s~.\n\nSpecial thanks to all contributors (see GitHub), the RageUI team, and everyone else who helped beta test, this would not have been possible without you all!', {}, true, {
+				RageUI.Button('About / Credits', 'Originally designed and created by ~b~Lt. Caine~s~. ELS sound effects by ~b~Faction~s~. LVC:Fleet expansion by ~b~Trevor Barns~s~.\n\nSpecial thanks to all contributors (see GitHub), the RageUI team, and everyone else who helped beta test, this would not have been possible without you all!', {}, true, {
+					onSelected = function()
+				end,
+				});				
+				RageUI.Button('Website', 'Learn more about Luxart Engineering and it\'s products at ~b~https://www.luxartengineering.com~w~!', {}, true, {
 					onSelected = function()
 				end,
 				});
