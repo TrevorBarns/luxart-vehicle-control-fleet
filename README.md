@@ -41,7 +41,7 @@ __Hazards Delay & SoundFX:__
 Customizable "Hold-to-activate/deactivate" hazard lights to prevent accidental activation when navigating trainers/vMenu. Added activation/deactivation sound effect of toggle switch based off IRL vehicle toggle switches.
 
 ## How to install:
-1. Visit: [Wiki - Installation](https://github.com/TrevorBarns/luxart-vehicle-control-fleet/wiki/Installation)
+1. Visit: [Wiki - Installation](https://docs.luxartengineering.com/fleet/what-is-lvc-fleet)
 
 ## Credits:
 Luxart Vehicle Control was an ingenious creation by __Lt. Caine__! Thank you! 
