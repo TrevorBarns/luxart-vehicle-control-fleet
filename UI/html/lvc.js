@@ -6,7 +6,6 @@ Made by TrevorBarns
 ---------------------------------------------------
 */
 
-var resourceName = "";
 var time_folder = "day/";
 var ta_pattern = "ta/pattern_3/";
 var audioPlayer = null;
@@ -36,8 +35,6 @@ window.addEventListener('message', function(event) {
 	var type = event.data._type;
 	if (type == "audio") {
 		playSound(event.data.file, event.data.volume);
-	}else if ( type == "setResourceName" ) {
-		resourceName = event.data.name
 	}else if (type == "hud:setItemState") {
 
 		var item = event.data.item;
@@ -142,7 +139,7 @@ $( document ).contextmenu( function() {
 
 // This function is used to send data back through to the LUA side 
 function sendData( name, data ) {
-	$.post( "https://"+ resourceName +"/" + name, JSON.stringify( data ), function( datab ) {
+	$.post( "https://lvc_fleet/" + name, JSON.stringify( data ), function( datab ) {
 		if ( datab != "ok" ) {
 			console.log( datab );
 		}            
