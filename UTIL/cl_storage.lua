@@ -33,7 +33,10 @@ local repo_version = nil
 local custom_tone_names = false
 local VCFs_backup = nil
 local profiles = { }
-				
+		
+--	forward local fn declaration
+local IsNewerVersion
+		
 ------------------------------------------------
 --Deletes all saved KVPs for that vehicle profile
 --	This should never be removed. It is the only easy way for end users to delete LVC data.
@@ -221,7 +224,7 @@ end
 --[[Loads all KVP values.]]
 function STORAGE:LoadSettings(skip_vcf_id)	
 	local skip_vcf_id = skip_vcf_id or false
-	UTIL:Print('^4LVC ^5STORAGE: ^7Loading Settings...')
+	UTIL:Print('^4LVC ^5STORAGE: ^7Loading Settings...', true)
 	local comp_version = GetResourceMetadata(GetCurrentResourceName(), 'compatible', 0)
 	local save_version = GetResourceKvpString(save_prefix .. 'save_version')
 	local incompatible = IsNewerVersion(comp_version, save_version) == 'older'
@@ -291,7 +294,7 @@ function STORAGE:LoadSettings(skip_vcf_id)
 						UTIL:Print('^4LVC ^5STORAGE:  ^7loaded custom tone names.', true)
 					end
 				else
-					UTIL:Print('^4LVC ^5STORAGE: ^1vcf_id not found in in approved vcfids.', true)
+					UTIL:Print('^4LVC ^5STORAGE: ^3Saved vcf_id not found in approved vcfids, assignements have likely changed.', true)
 				end
 					
 				--[[LVC, AUDIO, table]]
@@ -424,32 +427,24 @@ end
 ------------------------------------------------
 --HELPER FUNCTIONS for main siren settings saving:end
 --Compare Version Strings: Is version newer than test_version
-function IsNewerVersion(version, test_version)
+IsNewerVersion = function(version, test_version)
 	if version == nil or test_version == nil then
-		return false
+		return 'unknown'
 	end
-	
-	_, _, s1, s2, s3 = string.find( version, '(%d+)%.(%d+)%.(%d+)' )
-	_, _, c1, c2, c3 = string.find( test_version, '(%d+)%.(%d+)%.(%d+)' )
-	
-	if s1 > c1 then				-- s1.0.0 Vs c1.0.0
+
+	if type(version) == 'string' then
+		version = semver(version)
+	end
+	if type(test_version) == 'string' then
+		test_version = semver(test_version)
+	end
+
+	if version > test_version then
 		return 'older'
-	elseif s1 < c1 then
+	elseif version < test_version then
 		return 'newer'
-	else
-		if s2 > c2 then			-- 0.s2.0 Vs 0.c2.0
-			return 'older'
-		elseif s2 < c2 then
-			return 'newer'
-		else
-			if s3 > c3 then		-- 0.0.s3 Vs 0.0.c3
-				return 'older'
-			elseif s3 < c3 then
-				return 'newer'
-			else
-				return 'equal'
-			end
-		end
+	elseif version == test_version then
+		return 'equal'
 	end
 end
 

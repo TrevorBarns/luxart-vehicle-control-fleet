@@ -61,7 +61,6 @@ local experimental = GetResourceMetadata(GetCurrentResourceName(), 'experimental
 local debug_mode = GetResourceMetadata(GetCurrentResourceName(), 'debug_mode', 0) == 'true' 
 
 local plugin_count = 0
-local repo_version = '^8UNKWN^7'
 local plugins_cv = { }		-- table of active plugins current versions plugins_cv = { ['<pluginname>'] = <version> }
 local plugins_rv = { }		-- table of active plugins repository versions
 
@@ -124,7 +123,7 @@ CreateThread( function()
 		if GetCurrentResourceName() == 'lvc_fleet' then
 			if community_id ~= nil and community_id ~= '' then
 				--	UPDATE DETECTED
-				if curr_version < repo_version and repo_version ~= '^8UNKWN^7' then
+				if curr_version < repo_version then
 					print('\t|\t             ^8UPDATE REQUIRED                     ^7|')
 					print('\t|^8                      DOWNLOAD AT:                      ^7|')
 					print('\t|^2 github.com/TrevorBarns/luxart-vehicle-control/releases ^7|')
