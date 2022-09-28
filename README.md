@@ -9,6 +9,12 @@ Documentation and About: [Welcome to Luxart Engineering - Gitbook](https://www.l
 
 Support, Suggestions, and Updates: [TrevorBarns Development Discord](https://discord.link/lvc/)
 
+## Other Resources
+* [Luxart Vehicle Control v3](https://github.com/TrevorBarns/luxart-vehicle-control)
+* [Luxart Vehicle Control - Siren Packs](https://github.com/TrevorBarns/luxart-vehicle-control-extras)
+* [Server Sided Audio Tester](https://github.com/TrevorBarns/Server-Side-Audio-Tester)
+* [zScoreboard w/activity & ping](https://github.com/TrevorBarns/z-scoreboard)
+
 ## Credits:
 Luxart Vehicle Control was an ingenious creation by __Lt. Caine__! Thank you! 
 
