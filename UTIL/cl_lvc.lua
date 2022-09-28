@@ -863,16 +863,9 @@ CreateThread(function()
 							end
 
 							-- TOG RUMBLER
-							if LVC.rumbler and IsControlPressed(0, 131) then
+							if LVC.rumbler and IsControlPressed(0, 131) and MCTRL:GetSirenMode() == 1 then
 								if IsDisabledControlJustReleased(0, 19) and state_lxsiren[veh] > 0 then
-									MCTRL:SetTempRumblerMode(true)
-							   
-													 
-														
-											  
-							   
-														 
-														
+									MCTRL:SetTempRumblerMode(true)				
 								end
 							end
 							
