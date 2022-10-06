@@ -184,11 +184,13 @@ function STORAGE:SaveSettings()
 				SetResourceKvp(save_prefix .. 'vcf_'.. vcf_name .. '_tone_options', json.encode(tone_options))
 				UTIL:Print('^4LVC ^5STORAGE:  ^7saved custom tone options.')		
 			end
-			
+
 			--[[LVC, AUDIO table]]
 			local vcf_options = { 
 				peer_override 				= MCTRL:GetOverridePeerState(),
 				siren_mode	 				= MCTRL:GetSirenMode(),
+				rumbler_duration	 		= MCTRL:GetRumblerDurationIndex(),
+				rumbler_enabled 			= LVC.rumbler_enabled,
 				airhorn_intrp 				= LVC.airhorn_intrp,
 				reset_standby 				= LVC.reset_standby,
 				primary_manual 				= LVC.primary_manual,
@@ -271,6 +273,7 @@ function STORAGE:LoadSettings(skip_vcf_id)
 						vcf_name = UTIL:GetCurrentVCFName()
 						UTIL:Print(string.format('^4LVC ^5STORAGE:  ^7VCF changed to ^5%s^7', vcf_name), true)
 						UTIL:Print(string.format('^4LVC ^5STORAGE:  ^7loading VCF ^5%s^7', vcf_name), true)
+						UTIL:UpdateCurrentVCFData(veh, true)
 					end
 					
 					--[[tone names]]
@@ -307,6 +310,12 @@ function STORAGE:LoadSettings(skip_vcf_id)
 					if MENU.toggle_local_override then
 						MCTRL:SetSirenMode(vcf_options.siren_mode)
 					end		
+					if MENU.menu_rumbler_options then
+						LVC.rumbler_enabled = vcf_options.rumbler_enabled
+					end
+					if MENU.custom_rumbler_duration then
+						MCTRL:SetRumblerDurationIndex(vcf_options.rumbler_duration)
+					end
 					if MENU.toggle_airhorn_intrp then
 						LVC.airhorn_intrp = vcf_options.airhorn_intrp
 					end		
@@ -357,7 +366,6 @@ function STORAGE:LoadSettings(skip_vcf_id)
 		UTIL:Print('^4LVC ^5STORAGE: ^3No save present.', true)
 	end
 	UTIL:Print('^4LVC ^5STORAGE: ^7Finished Loading Settings...', true)
-	HUD:ShowNotification('~b~LVC:Fleet ~y~Warning~s~: Storage (load / save) has known bugs.', true)
 end
 
 ------------------------------------------------

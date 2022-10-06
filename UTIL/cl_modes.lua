@@ -30,10 +30,11 @@ MCTRL.RUMBLER = 2
 MCTRL.LOCAL = 3
 
 local override_peer_sirens = false
-local siren_mode 	= 1
+local siren_mode = 1
 
 --RUMBLER
-local rumbler_duration = 4
+local rumbler_duration_index = 1
+local rumbler_duration = 5
 local timer = rumbler_duration
 local previous_mode = nil
 
@@ -42,6 +43,7 @@ local siren_modes = {
 						{ string = 'RumblerString', ref = 'RumblerRef', bank = 'RumblerBank' },
 						{ string = 'ResidentString', ref = 0, bank = nil },
 					}
+local rumbler_durations = { 5, 10, 30, -1 }
 
 
 function MCTRL:SetOverridePeerState(state)
@@ -72,6 +74,16 @@ function MCTRL:GetSirenModeTable(mode)
 	return siren_modes[mode]
 end
 
+function MCTRL:SetRumblerDurationIndex(duration_index)
+	rumbler_duration_index = duration_index
+	rumbler_duration = rumbler_durations[rumbler_duration_index]
+	timer = rumbler_duration
+end
+
+function MCTRL:GetRumblerDurationIndex()
+	return rumbler_duration_index
+end
+
 function MCTRL:SetTempRumblerMode(state)
 	if state and siren_mode ~= self.RUMBLER then
 		previous_mode = siren_mode
@@ -93,16 +105,16 @@ CreateThread(function()
 	Wait(500)
 	while true do
 		if LVC.rumbler then
-			if siren_mode == MCTRL.RUMBLER then
+			if siren_mode == MCTRL.RUMBLER and rumbler_duration ~= -1 then
 				while timer > 0 and siren_mode == MCTRL.RUMBLER do
 					timer = timer - 1
 					Wait(1000)
 				end
+				timer = rumbler_duration
 				if siren_mode == MCTRL.RUMBLER then
-					timer = rumbler_duration
 					siren_mode = previous_mode
-					previous_mode = nil
 					SetLxSirenStateForVeh(veh, state_lxsiren[veh])
+					previous_mode = nil
 				end
 				Wait(0)
 			else

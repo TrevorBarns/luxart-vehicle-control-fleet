@@ -14,7 +14,7 @@ it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
+This program is distributed in the hope that it will be useful, 
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
@@ -26,6 +26,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 RMenu.Add('lvc', 'main', RageUI.CreateMenu(' ', 'Main Menu', 0, 0, "lvc", "lvc_fleet_logo"))
 RMenu.Add('lvc', 'maintone', RageUI.CreateSubMenu(RMenu:Get('lvc', 'main'),' ', 'Main Siren Settings', 0, 0, "lvc", "lvc_fleet_logo"))
+RMenu.Add('lvc', 'rumbler', RageUI.CreateSubMenu(RMenu:Get('lvc', 'main'), ' ', 'Rumbler Options', 0, 0, "lvc", "lvc_fleet_logo"))
 RMenu.Add('lvc', 'hudsettings', RageUI.CreateSubMenu(RMenu:Get('lvc', 'main'),' ', 'HUD Settings', 0, 0, "lvc", "lvc_fleet_logo"))
 RMenu.Add('lvc', 'audiosettings', RageUI.CreateSubMenu(RMenu:Get('lvc', 'main'), ' ', 'Audio Settings', 0, 0, "lvc", "lvc_fleet_logo"))
 RMenu.Add('lvc', 'volumesettings', RageUI.CreateSubMenu(RMenu:Get('lvc', 'audiosettings'), ' ', 'Audio Settings', 0, 0, "lvc", "lvc_fleet_logo"))
@@ -38,6 +39,7 @@ RMenu:Get('lvc', 'maintone'):SetTotalItemsPerPage(15)
 RMenu:Get('lvc', 'volumesettings'):SetTotalItemsPerPage(12)
 RMenu:Get('lvc', 'main'):DisplayGlare(false)
 RMenu:Get('lvc', 'maintone'):DisplayGlare(false)
+RMenu:Get('lvc', 'rumbler'):DisplayGlare(false)
 RMenu:Get('lvc', 'hudsettings'):DisplayGlare(false)
 RMenu:Get('lvc', 'audiosettings'):DisplayGlare(false)
 RMenu:Get('lvc', 'volumesettings'):DisplayGlare(false)
@@ -45,7 +47,6 @@ RMenu:Get('lvc', 'plugins'):DisplayGlare(false)
 RMenu:Get('lvc', 'saveload'):DisplayGlare(false)
 RMenu:Get('lvc', 'copyprofile'):DisplayGlare(false)
 RMenu:Get('lvc', 'info'):DisplayGlare(false)
-
 
 --Strings for Save/Load confirmation, not ideal but it works.
 local ok_to_disable  = true
@@ -100,6 +101,7 @@ end
 function IsMenuOpen()
 	return 	RageUI.Visible(RMenu:Get('lvc', 'main')) or
 			RageUI.Visible(RMenu:Get('lvc', 'maintone')) or
+			RageUI.Visible(RMenu:Get('lvc', 'rumbler')) or
 			RageUI.Visible(RMenu:Get('lvc', 'hudsettings')) or
 			RageUI.Visible(RMenu:Get('lvc', 'audiosettings')) or
 			RageUI.Visible(RMenu:Get('lvc', 'volumesettings')) or
@@ -343,6 +345,12 @@ CreateThread(function()
 			RageUI.IsVisible(RMenu:Get('lvc', 'maintone'), function()
 				if MENU.toggle_airhorn_intrp or MENU.toggle_reset_standby or MENU.main_siren_settings_menu or MENU.toggle_park_kill then
 					RageUI.Separator('Siren Settings')
+					if MENU.menu_rumbler_options and LVC.rumbler then
+						RageUI.Button('Rumbler Options', 'Options related to rumbler / howler siren.', {RightLabel = '→→→'}, true, {
+						  onSelected = function()
+						  end,
+						}, RMenu:Get('lvc', 'rumbler'))
+					end					
 					if MENU.toggle_airhorn_intrp then
 						RageUI.Checkbox('Airhorn Interrupt Mode', 'Toggles whether the airhorn interrupts main siren.', LVC.airhorn_intrp, {}, {
 						  onChecked = function()
@@ -374,6 +382,7 @@ CreateThread(function()
 						})
 					end
 					if MENU.custom_tone_options then
+						RageUI.Separator('Tone Options')
 						for tone, siren_table in pairs(SIRENS) do
 							RageUI.List(siren_table.Name, { 'Cycle & Button', 'Cycle Only', 'Button Only', 'Disabled' }, UTIL:GetToneOption(tone), '~g~Cycle:~s~ play as you cycle through sirens.\n~g~Button:~s~ play when registered key is pressed.\n~b~Select to rename siren tones.', {}, true, {
 								onListChange = function(Index, Item)
@@ -393,7 +402,30 @@ CreateThread(function()
 						end
 					end
 				end
-			end)
+			end)	
+			if MENU.menu_rumbler_options and LVC.rumbler then
+				RageUI.IsVisible(RMenu:Get('lvc', 'rumbler'), function()
+					RageUI.Checkbox('Enabled', 'Toggles controls for rumbler / howler functionality. ~c~(DEFAULT: LSHIFT+LALT)', LVC.rumbler_enabled, {}, {
+						onChecked = function()
+							LVC.rumbler_enabled = true
+						end,
+						onUnChecked = function()
+							LVC.rumbler_enabled = false
+							if MCTRL:GetSirenMode() == MCTRL.RUMBLER then
+								MCTRL:SetSirenMode(MCTRL.NORMAL)
+								SetLxSirenStateForVeh(veh, state_lxsiren[veh])
+							end
+						end,
+					})
+					if MENU.custom_rumbler_duration then
+						RageUI.List('Duration', {'5', '10', '30', 'Indefinite'}, MCTRL:GetRumblerDurationIndex(), 'Determines how long to run rumbler tone before reverting to normal siren tone.', {}, LVC.rumbler_enabled, {
+						  onListChange = function(Index, Item)
+							MCTRL:SetRumblerDurationIndex(Index)
+						  end,
+						})
+					end
+				end)
+			end
 			---------------------------------------------------------------------
 			-------------------------OTHER SETTINGS MENU-------------------------
 			---------------------------------------------------------------------
