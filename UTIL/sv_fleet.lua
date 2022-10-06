@@ -214,8 +214,10 @@ CreateThread(function()
 	for id, filename in ipairs(VCF_Files) do	--table of VCF filenames in SETTINGS.lua
 		local data = LoadResourceFile(GetCurrentResourceName(), 'VCF/'..filename)
 		if data then
+			DebugPrint('------------------------------------------------------')			
+			DebugPrint(('-----------------LOADING %s-----------------'):format(filename))			
 			local VCF_RAW = parseFile(data)		--XML -> LUA
-			local VCF = XML:RekeyTable(VCF_RAW)	--integer key -> string key
+			local VCF = XML:RekeyTable(VCF_RAW, filename)	--integer key -> string key
 			VCFs[id] = XML:LoadXMLData(VCF)		--reorganize & casting of var type
 			DebugPrint(('loaded VCF file %s'):format(filename), true)
 		end
@@ -223,10 +225,10 @@ CreateThread(function()
 end)
 ---------------------------------------------------
 --Removes tables indexed by integer and replaces with string key
-function XML:RekeyTable(tbl)
+function XML:RekeyTable(tbl, filename)
 	local newTable = { }
 	local faction = tbl[1].vcfroot['Faction']
-
+	local author = tbl[1].vcfroot['Author']
 	for i,v in pairs(tbl[1].vcfroot) do
 		local newkey = v.tag
 		if newkey ~= nil then
@@ -235,6 +237,7 @@ function XML:RekeyTable(tbl)
 		end
 	end
 	newTable.faction = faction
+	newTable.author = author
 	return newTable
 end
 ---------------------------------------------------
@@ -252,6 +255,7 @@ end
 function XML:LoadXMLData(xmlTable)
 	local AUDIO, HUD, LVC, MENU, HORNS, SIRENS =  { }, { }, { }, { }, { }, { }
 	LVC.faction = xmlTable.faction
+	LVC.author = xmlTable.author
 
 	for class, object in pairs(xmlTable) do
 		if class == 'AUDIO' then
@@ -259,12 +263,7 @@ function XML:LoadXMLData(xmlTable)
 				local key = v.tag
 				if v[key].Enabled ~= nil then
 					AUDIO[string.lower(key)] = XML:StringToBool(v[key].Enabled)
-					DebugPrint(('AUDIO.%s = %s'):format(string.lower(key), v[key].Enabled))
-				--[[
-				elseif v[key].String ~= nil then
-					AUDIO[string.lower(key)] = v[key].String
-					DebugPrint(('AUDIO.%s = %s'):format(string.lower(key), v[key].String))	
-				]]					
+					DebugPrint(('AUDIO.%s = %s'):format(string.lower(key), v[key].Enabled))			
 				elseif v[key].Val ~= nil then
 					AUDIO[string.lower(key)] = tonumber(v[key].Val)
 					DebugPrint(('AUDIO.%s = %s'):format(string.lower(key), AUDIO[string.lower(key)]))				
@@ -331,7 +330,6 @@ function XML:LoadXMLData(xmlTable)
 			end
 		end
 	end
-	
 	return { AUDIO=AUDIO, HUD=HUD, LVC=LVC, MENU=MENU, HORNS=HORNS, SIRENS=SIRENS } 
 end
 ---------------------------------------------------
