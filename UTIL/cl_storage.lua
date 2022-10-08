@@ -319,7 +319,7 @@ function STORAGE:LoadSettings(skip_vcf_id)
 					if MENU.toggle_airhorn_intrp then
 						LVC.airhorn_intrp = vcf_options.airhorn_intrp
 					end		
-					if MENU.toggle_reset_standby and vcf_options.peer_override ~= nil then
+					if MENU.toggle_reset_standby then
 						LVC.reset_standby = vcf_options.reset_standby
 					end		
 					if MENU.custom_manual then
