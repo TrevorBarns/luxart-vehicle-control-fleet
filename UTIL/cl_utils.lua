@@ -35,7 +35,6 @@ local approved_VCF_IDs = { }
 local approved_VCF_names = { }
 VCF_index = nil
 
--- OLD SHIT
 local tone_options = { }
 local profile = nil
 
@@ -136,11 +135,6 @@ function UTIL:UpdateCurrentVCFData(veh, reset)
 	MENU = profile_data.MENU
 	HORNS = profile_data.HORNS
 	SIRENS = profile_data.SIRENS
-	-- Custom Siren Names
-	local siren_names = {}
-	for i, siren_pkg in ipairs(SIRENS) do
-		siren_names[#siren_names+1] = siren_pkg.Name
-	end
 
 	--Rumbler Settings
 	MCTRL:SetRumblerDurationIndex(LVC.rumbler_duration_index)
