@@ -7,7 +7,7 @@ author 'TrevorBarns w/ credits see GitHub'
 description 'A siren / emergency lights controller for FiveM.'
 
 version '1.0.0-ALPHA'	-- Readonly version of currently installed version.
-compatible '1.0.0'		-- Readonly save reverse compatiability.
+compatible '1.0.0-ALPHA'-- Readonly save reverse compatiability.
 
 ------------------------------
 
@@ -36,6 +36,7 @@ files({
 
 
 shared_script {
+	'/UTIL/semver.lua',
 	'/UI/cl_locale.lua',
 	'/UI/locale/en.lua',	-- Set locale / language file here.
 	'SETTINGS.lua',
