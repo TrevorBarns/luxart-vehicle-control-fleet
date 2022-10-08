@@ -38,7 +38,7 @@ debug_mode = false
 local radioWheelActive = false
 
 local count_broadcast_timer = 0
-local delay_broadcast_timer = 300
+local delay_broadcast_timer = 500
 
 local count_sndclean_timer = 0
 local delay_sndclean_timer = 400
@@ -202,7 +202,7 @@ end)
 RegisterNetEvent('lvc:onVehicleExit')
 AddEventHandler('lvc:onVehicleExit', function()
 	if park_kill_masterswitch and park_kill then
-		if not tone_main_reset_standby and state_lxsiren[veh] ~= 0 then
+		if not LVC.reset_standby and state_lxsiren[veh] ~= 0 then
 			UTIL:SetToneByID('MAIN_MEM', state_lxsiren[veh])
 		end
 		SetLxSirenStateForVeh(veh, 0)
@@ -233,8 +233,8 @@ end)
 --------------REGISTERED COMMANDS---------------
 --Toggle debug mode
 RegisterCommand('lvcdebug', function(source, args)
-	print(json.encode(approved_VCF_profiles))
 	debug_mode = not debug_mode
+	UTIL:Print(json.encode(approved_VCF_profiles))
 	HUD:ShowNotification(('~y~~h~Info:~h~ ~s~debug mode set to %s. See console.'):format(debug_mode), true)
 	UTIL:Print(('^3LVC Info: debug mode set to %s temporarily. Debug_mode resets after resource restart unless set in fxmanifest. Make sure to run "refresh" to see fxmanifest changes.'):format(debug_mode), true)
 	if debug_mode then
@@ -675,66 +675,6 @@ AddEventHandler('lvc:SetAirManuState_c', function(sender, newstate, vcfid, using
 	end
 end)
 
-function TogLxSiren()
-	if state_lxsiren[veh] == 0 then
-		if IsVehicleSirenOn(veh) then
-			local new_tone = nil
-			AUDIO:Play('Upgrade', AUDIO.upgrade_volume)
-			HUD:SetItemState('siren', true)
-			if LVC.reset_standby then
-				new_tone = UTIL:GetNextSirenTone(0, veh, true)
-				SetLxSirenStateForVeh(veh, new_tone)
-			else
-				--	GET THE SAVED TONE VERIFY IT IS APPROVED, AND NOT DISABLED / BUTTON ONLY
-				local option = UTIL:GetToneOption(LVC.Main_Mem)
-				if option ~= 3 and option ~= 4 then
-					SetLxSirenStateForVeh(veh, LVC.Main_Mem)
-				else
-					new_tone = UTIL:GetNextSirenTone(0, veh, true)
-					SetLxSirenStateForVeh(veh, new_tone)
-				end
-
-			end
-		end
-	else
-		AUDIO:Play('Downgrade', AUDIO.downgrade_volume)
-		-- ONLY CHANGE NUI STATE IF PWRCALL IS OFF AS WELL
-		if state_auxiliary[veh] == 0 then
-			HUD:SetItemState('siren', false)
-		end
-		LVC.Main_Mem = state_lxsiren[veh]
-		SetLxSirenStateForVeh(veh, 0)
-	end
-	AUDIO:ResetActivityTimer()
-	count_broadcast_timer = delay_broadcast_timer
-end
-
-function TogAuxiliarySiren()
-	if state_auxiliary[veh] == 0 then
-		if IsVehicleSirenOn(veh) then
-			AUDIO:Play('Upgrade', AUDIO.upgrade_volume)
-			HUD:SetItemState('siren', true)
-			SetAuxiliaryStateForVeh(veh, LVC.auxiliary)
-		end
-	else
-		AUDIO:Play('Downgrade', AUDIO.downgrade_volume)
-		if state_lxsiren[veh] == 0 then
-			HUD:SetItemState('siren', false)
-		end
-		SetAuxiliaryStateForVeh(veh, 0)
-	end
-	AUDIO:ResetActivityTimer()
-	count_broadcast_timer = delay_broadcast_timer
-end
-
-function CycleLxSiren()
-	AUDIO:Play('Upgrade', AUDIO.upgrade_volume)
-	HUD:SetItemState('horn', false)
-	SetLxSirenStateForVeh(veh, UTIL:GetNextSirenTone(state_lxsiren[veh], veh, true))
-	count_broadcast_timer = delay_broadcast_timer
-end
-
-
 ---------------------------------------------------------------------
 CreateThread(function()
 	Wait(500)
@@ -828,16 +768,65 @@ CreateThread(function()
 								end
 								AUDIO:ResetActivityTimer()
 							------ TOG LX SIREN ------
-							elseif IsDisabledControlJustReleased(0, 19) and not (IsControlPressed(0, 131) and LVC.rumbler) then
-								TogLxSiren()
+							elseif IsDisabledControlJustReleased(0, 19) and not (IsControlPressed(0, 131) and LVC.rumbler_enabled) then
+								if state_lxsiren[veh] == 0 then
+									if IsVehicleSirenOn(veh) then
+										local new_tone = nil
+										AUDIO:Play('Upgrade', AUDIO.upgrade_volume)
+										HUD:SetItemState('siren', true)
+										if LVC.reset_standby then
+											if MCTRL:GetSirenMode() == MCTRL.RUMBLER then
+												MCTRL:SetSirenMode(1)
+											end
+											new_tone = UTIL:GetNextSirenTone(0, veh, true)
+											SetLxSirenStateForVeh(veh, new_tone)
+										else
+											--	GET THE SAVED TONE VERIFY IT IS APPROVED, AND NOT DISABLED / BUTTON ONLY
+											local option = UTIL:GetToneOption(LVC.Main_Mem)
+											if option ~= 3 and option ~= 4 then
+												SetLxSirenStateForVeh(veh, LVC.Main_Mem)
+											else
+												new_tone = UTIL:GetNextSirenTone(0, veh, true)
+												SetLxSirenStateForVeh(veh, new_tone)
+											end
+										end
+									end
+								else
+									AUDIO:Play('Downgrade', AUDIO.downgrade_volume)
+									-- ONLY CHANGE NUI STATE IF PWRCALL IS OFF AS WELL
+									if state_auxiliary[veh] == 0 then
+										HUD:SetItemState('siren', false)
+									end
+									LVC.Main_Mem = state_lxsiren[veh]
+									SetLxSirenStateForVeh(veh, 0)
+								end
+								AUDIO:ResetActivityTimer()
+								count_broadcast_timer = delay_broadcast_timer
 							-- AUXILIARY
 							elseif IsDisabledControlJustReleased(0, 172) and not IsMenuOpen() then
-								TogAuxiliarySiren()
+								if state_auxiliary[veh] == 0 then
+									if IsVehicleSirenOn(veh) then
+										AUDIO:Play('Upgrade', AUDIO.upgrade_volume)
+										HUD:SetItemState('siren', true)
+										SetAuxiliaryStateForVeh(veh, LVC.auxiliary)
+									end
+								else
+									AUDIO:Play('Downgrade', AUDIO.downgrade_volume)
+									if state_lxsiren[veh] == 0 then
+										HUD:SetItemState('siren', false)
+									end
+									SetAuxiliaryStateForVeh(veh, 0)
+								end
+								AUDIO:ResetActivityTimer()
+								count_broadcast_timer = delay_broadcast_timer
 							end
 							-- CYCLE LX SRN TONES
 							if state_lxsiren[veh] > 0 then
 								if IsDisabledControlJustReleased(0, 80) then
-									CycleLxSiren()
+									AUDIO:Play('Upgrade', AUDIO.upgrade_volume)
+									HUD:SetItemState('horn', false)
+									SetLxSirenStateForVeh(veh, UTIL:GetNextSirenTone(state_lxsiren[veh], veh, true))
+									count_broadcast_timer = delay_broadcast_timer
 								elseif IsDisabledControlPressed(0, 80) then
 									HUD:SetItemState('horn', true)	
 								end
@@ -863,7 +852,7 @@ CreateThread(function()
 							end
 
 							-- TOG RUMBLER
-							if LVC.rumbler and IsControlPressed(0, 131) and MCTRL:GetSirenMode() == 1 then
+							if LVC.rumbler and LVC.rumbler_enabled and IsControlPressed(0, 131) and MCTRL:GetSirenMode() ~= MCTRL.LOCAL then
 								if IsDisabledControlJustReleased(0, 19) and state_lxsiren[veh] > 0 then
 									MCTRL:SetTempRumblerMode(true)				
 								end

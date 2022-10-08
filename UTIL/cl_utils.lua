@@ -35,16 +35,6 @@ local approved_VCF_IDs = { }
 local approved_VCF_names = { }
 VCF_index = nil
 
-override_peer_sirens = true
-siren_mode 	= 1
-siren_modes = 	{
-					{ string = 'String', ref = 'Ref', bank = 'Bank' },
-					{ string = 'RumblerString', ref = 'RumblerRef', bank = 'RumblerBank' },
-					{ string = 'ResidentString', ref = 0, bank = nil },
-				}
-
-
--- OLD SHIT
 local tone_options = { }
 local profile = nil
 
@@ -95,7 +85,7 @@ function UTIL:GetProfileFromTable(print_name, tbl, veh, ignore_missing_default)
 		HUD:ShowNotification(('~b~~h~LVC~h~ ~r~ERROR: %s attempted to get profile from nil table. See console.'):format(print_name), true)
 		UTIL:Print(('^1LVC(%s) ERROR: %s attempted to get profile from nil table. This is typically caused by an invalid character or missing { } brace in SIRENS.lua. (https://git.io/JDVhK)'):format(STORAGE:GetCurrentVersion(), print_name), true)
 	end
-		
+	
 	return profile_table, profile
 end
 
@@ -142,13 +132,13 @@ function UTIL:UpdateCurrentVCFData(veh, reset)
 		LVC[key] = value
 	end
 	
+	MENU = profile_data.MENU
 	HORNS = profile_data.HORNS
 	SIRENS = profile_data.SIRENS
-	local siren_names = {}
-	for i, siren_pkg in ipairs(SIRENS) do
-		siren_names[#siren_names+1] = siren_pkg.Name
-	end
-	MENU = profile_data.MENU
+
+	--Rumbler Settings
+	MCTRL:SetRumblerDurationIndex(LVC.rumbler_duration_index)
+	LVC.rumbler_enabled = LVC.rumbler
 	
 	--Build options table
 	UTIL:BuildToneOptions()
