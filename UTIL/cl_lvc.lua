@@ -218,8 +218,7 @@ RegisterNetEvent('lvc:onVehicleChange')
 AddEventHandler('lvc:onVehicleChange', function()
 	last_veh = veh
 	VCF_index = 1
-	UTIL:UpdateCurrentVCFData(veh)
-	--STORAGE:ResetSettings()
+	UTIL:UpdateCurrentVCFData(veh, true)
 	STORAGE:LoadSettings()
 	RegisterKeyMaps()
 	HUD:RefreshHudItemStates()
