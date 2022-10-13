@@ -79,43 +79,47 @@ local RegisterKeyMaps, MakeOrdinal
 --[[ Configuration checking: conflicting resource, conflicting resource, community ID. 
 	 player_is_emerg_driver: loop updating vehicle, trailer, checking seat and disabling controls.]]
 CreateThread(function()
-	if GetResourceState('lux_vehcontrol') ~= 'started' and GetResourceState('lux_vehcontrol') ~= 'starting' then
-		if GetCurrentResourceName() == 'lvc_fleet' then
-			if community_id ~= nil and community_id ~= '' then
-				while true do
-					playerped = GetPlayerPed(-1)
-					--IS IN VEHICLE
-					player_is_emerg_driver = false
-					if IsPedInAnyVehicle(playerped, false) then
-						veh = GetVehiclePedIsUsing(playerped)
-						_, trailer = GetVehicleTrailerVehicle(veh)
-						--IS DRIVER
-						if GetPedInVehicleSeat(veh, -1) == playerped then
-							--IS EMERGENCY VEHICLE
-							if GetVehicleClass(veh) == 18 then
-								player_is_emerg_driver = true
-								DisableControlAction(0, 80, true) -- INPUT_VEH_CIN_CAM
-								DisableControlAction(0, 86, true) -- INPUT_VEH_HORN
-								DisableControlAction(0, 172, true) -- INPUT_CELLPHONE_UP
-							end
-						end
-					end
-					Wait(1)
-				end
-			else
-				Wait(1000)
-				HUD:ShowNotification('~b~~h~LVC~h~ ~r~~h~CONFIG ERROR~h~~s~: COMMUNITY ID MISSING. SEE LOGS. CONTACT SERVER DEVELOPER.', true)
-				UTIL:Print('^1CONFIG ERROR: COMMUNITY ID NOT SET, THIS IS REQUIRED TO PREVENT CONFLICTS FOR PLAYERS WHO PLAY ON MULTIPLE SERVERS WITH LVC. PLEASE SET THIS IN SETTINGS.LUA.', true)
-			end
-		else
-			Wait(1000)
-			HUD:ShowNotification('~b~~h~LVC~h~ ~r~~h~CONFIG ERROR~h~~s~: INVALID RESOURCE NAME. SEE LOGS. CONTRACT SERVER DEVELOPER.', true)
-			UTIL:Print('^1CONFIG ERROR: INVALID RESOURCE NAME. PLEASE VERIFY RESOURCE FOLDER NAME READS "^3lvc^1" (CASE-SENSITIVE). THIS IS REQUIRED FOR PROPER SAVE / LOAD FUNCTIONALITY. PLEASE RENAME, REFRESH, AND ENSURE.', true)
-		end
-	else
+	local lux_vehcontrol_state = GetResourceState('lux_vehcontrol') == 'started' 
+	local lvc_fleet_state = GetResourceState('lvc_fleet') == 'started' 
+	local qb_extras_state = GetResourceState('qb-extras') == 'started' 
+	if lux_vehcontrol_state or lvc_fleet_state or qb_extras_state then
 		Wait(1000)
 		HUD:ShowNotification('~b~~h~LVC~h~ ~r~~h~CONFLICT ERROR~h~~s~: RESOURCE CONFLICT. SEE CONSOLE.', true)
 		UTIL:Print('^1LVC ERROR: DETECTED "lux_vehcontrol" RUNNING, THIS CONFLICTS WITH LVC. PLEASE STOP "lux_vehcontrol" AND RESTART LVC.', true)
+		return
+	end
+	if GetCurrentResourceName() ~= 'lvc_fleet' then
+		Wait(1000)
+		HUD:ShowNotification('~b~~h~LVC~h~ ~r~~h~CONFIG ERROR~h~~s~: INVALID RESOURCE NAME. SEE LOGS. CONTRACT SERVER DEVELOPER.', true)
+		UTIL:Print('^1CONFIG ERROR: INVALID RESOURCE NAME. PLEASE VERIFY RESOURCE FOLDER NAME READS "^3lvc_fleet^1" (CASE-SENSITIVE). THIS IS REQUIRED FOR PROPER SAVE / LOAD FUNCTIONALITY. PLEASE RENAME, REFRESH, AND ENSURE.', true)
+		return
+	end
+	if community_id == nil or community_id == '' then
+		Wait(1000)
+		HUD:ShowNotification('~b~~h~LVC~h~ ~r~~h~CONFIG ERROR~h~~s~: COMMUNITY ID MISSING. SEE LOGS. CONTACT SERVER DEVELOPER.', true)
+		UTIL:Print('^1CONFIG ERROR: COMMUNITY ID NOT SET, THIS IS REQUIRED TO PREVENT CONFLICTS FOR PLAYERS WHO PLAY ON MULTIPLE SERVERS WITH LVC. PLEASE SET THIS IN SETTINGS.LUA.', true)
+		return
+	end
+
+	while true do
+		playerped = GetPlayerPed(-1)
+		--IS IN VEHICLE
+		player_is_emerg_driver = false
+		if IsPedInAnyVehicle(playerped, false) then
+			veh = GetVehiclePedIsUsing(playerped)
+			_, trailer = GetVehicleTrailerVehicle(veh)
+			--IS DRIVER
+			if GetPedInVehicleSeat(veh, -1) == playerped then
+				--IS EMERGENCY VEHICLE
+				if GetVehicleClass(veh) == 18 then
+					player_is_emerg_driver = true
+					DisableControlAction(0, 80, true) -- INPUT_VEH_CIN_CAM
+					DisableControlAction(0, 86, true) -- INPUT_VEH_HORN
+					DisableControlAction(0, 172, true) -- INPUT_CELLPHONE_UP
+				end
+			end
+		end
+		Wait(1)
 	end
 end)
 
@@ -210,7 +214,7 @@ AddEventHandler('lvc:onVehicleExit', function()
 		SetAirManuStateForVeh(veh, 0)
 		HUD:SetItemState('siren', false)
 		HUD:SetItemState('horn', false)
-		count_bcast_timer = delay_bcast_timer
+		count_broadcast_timer = delay_broadcast_timer
 	end
 end)
 
@@ -232,12 +236,17 @@ end)
 --------------REGISTERED COMMANDS---------------
 --Toggle debug mode
 RegisterCommand('lvcdebug', function(source, args)
-	debug_mode = not debug_mode
-	UTIL:Print(json.encode(approved_VCF_profiles))
-	HUD:ShowNotification(('~y~~h~Info:~h~ ~s~debug mode set to %s. See console.'):format(debug_mode), true)
-	UTIL:Print(('^3LVC Info: debug mode set to %s temporarily. Debug_mode resets after resource restart unless set in fxmanifest. Make sure to run "refresh" to see fxmanifest changes.'):format(debug_mode), true)
-	if debug_mode then
-		TriggerEvent('lvc:onVehicleChange')
+	if player_is_emerg_driver then
+		debug_mode = not debug_mode
+		UTIL:Print(json.encode(approved_VCF_profiles))
+		HUD:ShowNotification(('~y~~h~Info:~h~ ~s~debug mode set to %s. See console.'):format(debug_mode), true)
+		UTIL:Print(('^3LVC Info: debug mode set to %s temporarily. Debug_mode resets after resource restart unless set in fxmanifest. Make sure to run "refresh" to see fxmanifest changes.'):format(debug_mode), true)
+		if debug_mode then
+			TriggerEvent('lvc:onVehicleChange')
+		end
+	else
+		HUD:ShowNotification('~b~~h~LVC~h~~y~ ~h~Info:~h~~s~ vehicle not found, please enter a vehicle first.', true)
+		UTIL:Print('^3LVC Info: debug mode not set. Please enter a vehicle and run the command again.', true)
 	end
 end)
 
@@ -453,7 +462,7 @@ function SetLxSirenStateForVeh(veh, newstate, vcfid, mode_id)
 				TogMuteDfltSrnForVeh(veh, true)
 			end
 			state_lxsiren[veh] 	= newstate
-			state_mode[veh]		= mode
+			state_mode[veh]		= mode_id
 		end
 	end
 end
@@ -709,7 +718,7 @@ CreateThread(function()
 			--- IS EMERG VEHICLE ---
 			if GetVehicleClass(veh) == 18 then
 				if UpdateOnscreenKeyboard() ~= 0 and not IsEntityDead(veh) then
-						lights_on = IsVehicleSirenOn(veh)
+					lights_on = IsVehicleSirenOn(veh)
 					--- SET INIT TABLE VALUES ---
 					if state_lxsiren[veh] == nil then
 						state_lxsiren[veh] = 0
@@ -989,7 +998,6 @@ CreateThread(function()
 						end
 					end
 				end
-
 
 				----- AUTO BROADCAST VEH STATES -----
 				if count_broadcast_timer > delay_broadcast_timer then
