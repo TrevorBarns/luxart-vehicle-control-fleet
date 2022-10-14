@@ -80,12 +80,12 @@ local RegisterKeyMaps, MakeOrdinal
 	 player_is_emerg_driver: loop updating vehicle, trailer, checking seat and disabling controls.]]
 CreateThread(function()
 	local lux_vehcontrol_state = GetResourceState('lux_vehcontrol') == 'started' 
-	local lvc_fleet_state = GetResourceState('lvc_fleet') == 'started' 
+	local lvc_state = GetResourceState('lvc') == 'started' 
 	local qb_extras_state = GetResourceState('qb-extras') == 'started' 
-	if lux_vehcontrol_state or lvc_fleet_state or qb_extras_state then
+	if lux_vehcontrol_state or lvc_state or qb_extras_state then
 		Wait(1000)
 		HUD:ShowNotification('~b~~h~LVC~h~ ~r~~h~CONFLICT ERROR~h~~s~: RESOURCE CONFLICT. SEE CONSOLE.', true)
-		UTIL:Print('^1LVC ERROR: DETECTED "lux_vehcontrol" RUNNING, THIS CONFLICTS WITH LVC. PLEASE STOP "lux_vehcontrol" AND RESTART LVC.', true)
+		UTIL:Print('^1LVC ERROR: DETECTED CONFLICTING RESOURCE, PLEASE VERIFY THAT "^3lux_vehcontrol^1", "^3lvc^1", OR "^3qb-extras^1" ARE NOT RUNNING.',, true)
 		return
 	end
 	if GetCurrentResourceName() ~= 'lvc_fleet' then
