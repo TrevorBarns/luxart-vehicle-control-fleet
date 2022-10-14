@@ -85,7 +85,7 @@ CreateThread(function()
 	if lux_vehcontrol_state or lvc_state or qb_extras_state then
 		Wait(1000)
 		HUD:ShowNotification('~b~~h~LVC~h~ ~r~~h~CONFLICT ERROR~h~~s~: RESOURCE CONFLICT. SEE CONSOLE.', true)
-		UTIL:Print('^1LVC ERROR: DETECTED CONFLICTING RESOURCE, PLEASE VERIFY THAT "^3lux_vehcontrol^1", "^3lvc^1", OR "^3qb-extras^1" ARE NOT RUNNING.',, true)
+		UTIL:Print('^1LVC ERROR: DETECTED CONFLICTING RESOURCE, PLEASE VERIFY THAT "^3lux_vehcontrol^1", "^3lvc^1", OR "^3qb-extras^1" ARE NOT RUNNING.', true)
 		return
 	end
 	if GetCurrentResourceName() ~= 'lvc_fleet' then
@@ -146,29 +146,6 @@ CreateThread(function()
 	end
 end)
 
-----------------PARK KILL THREADS----------------
---Kill siren on Exit
-CreateThread(function()
-	while true do
-		while LVC.park_kill and playerped ~= nil and veh ~= nil do
-			if GetIsTaskActive(playerped, 2) then
-				if not LVC.reset_standby and state_lxsiren[veh] ~= 0 then
-					LVC.Main_Mem = state_lxsiren[veh]
-				end
-				SetLxSirenStateForVeh(veh, 0)
-				SetAuxiliaryStateForVeh(veh, 0)
-				SetAirManuStateForVeh(veh, 0)
-				HUD:SetItemState('siren', false)
-				HUD:SetItemState('horn', false)
-				count_broadcast_timer = delay_broadcast_timer
-				Wait(1000)
-			end
-			Wait(0)
-		end
-		Wait(1000)
-	end
-end)
-
 ------ON VEHICLE EXIT EVENT TRIGGER------
 CreateThread(function()
 	while true do
@@ -205,12 +182,12 @@ end)
 --Kill siren on Exit
 RegisterNetEvent('lvc:onVehicleExit')
 AddEventHandler('lvc:onVehicleExit', function()
-	if park_kill_masterswitch and park_kill then
+	if LVC.park_kill then
 		if not LVC.reset_standby and state_lxsiren[veh] ~= 0 then
 			UTIL:SetToneByID('MAIN_MEM', state_lxsiren[veh])
 		end
 		SetLxSirenStateForVeh(veh, 0)
-		SetPowercallStateForVeh(veh, 0)
+		SetAuxiliaryStateForVeh(veh, 0)
 		SetAirManuStateForVeh(veh, 0)
 		HUD:SetItemState('siren', false)
 		HUD:SetItemState('horn', false)
