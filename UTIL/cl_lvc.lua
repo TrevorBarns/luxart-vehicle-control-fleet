@@ -252,8 +252,8 @@ RegisterKeyMaps = function()
 		local description = 'LVC Siren: ' .. MakeOrdinal(tone)
 
 		RegisterCommand(command, function(source, args)
-			if veh ~= nil and player_is_emerg_driver ~= nil then
-				if IsVehicleSirenOn(veh) and player_is_emerg_driver and not key_lock then
+			if player_is_emerg_driver and not key_lock then
+				if IsVehicleSirenOn(veh) then
 					local tone_option = UTIL:GetToneOption(tone)
 					if tone_option ~= nil then
 						if tone_option == 1 or tone_option == 3 then
