@@ -96,5 +96,12 @@ function AUDIO:SetActivityReminderIndex(index)
 	end
 end
 
+--[[Setter for radio wheel and radio station]]
+function AUDIO:SetRadioState(station)
+	SetVehicleRadioEnabled(veh, self.radio)
+	SetVehRadioStation(veh, station)
+	Wait(500)
+	SetVehRadioStation(veh, station)
+end
 
 	

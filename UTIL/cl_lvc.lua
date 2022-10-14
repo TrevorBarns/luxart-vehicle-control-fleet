@@ -226,10 +226,7 @@ AddEventHandler('lvc:onVehicleChange', function()
 	STORAGE:LoadSettings()
 	RegisterKeyMaps()
 	HUD:RefreshHudItemStates()
-	SetVehicleRadioEnabled(veh, AUDIO.radio)
-	SetVehRadioStation(veh, 'OFF')
-	Wait(500)
-	SetVehRadioStation(veh, 'OFF')
+	AUDIO:SetRadioState('OFF')
 end)
 
 
