@@ -34,17 +34,6 @@ trailer = nil
 player_is_emerg_driver = false
 debug_mode = false
 
---LOCAL VARIABLES
-local count_broadcast_timer = 0
-local delay_broadcast_timer = 500
-
-local count_sndclean_timer = 0
-local delay_sndclean_timer = 400
-
-local actv_ind_timer = false
-local count_ind_timer = 0
-local delay_ind_timer = 180
-
 state_indic = {}
 state_lxsiren = {}
 state_auxiliary = {}
@@ -55,6 +44,24 @@ actv_manu = false
 actv_horn = false
 
 actv_lxsrnmute_temp = false
+
+--LOCAL VARIABLES
+--	Cached
+local ipairs = ipairs
+local pairs = pairs
+local table = table
+local string = string
+
+local locked_press_count = 0
+local count_broadcast_timer = 0
+local delay_broadcast_timer = 500
+
+local count_sndclean_timer = 0
+local delay_sndclean_timer = 400
+
+local actv_ind_timer = false
+local count_ind_timer = 0
+local delay_ind_timer = 180
 
 local srntone_temp = 0
 local dsrn_mute = true
@@ -74,7 +81,7 @@ local loaded_banks = {}
 local RegisterKeyMaps, MakeOrdinal
 
 ----------------THREADED FUNCTIONS----------------
---[[ Configuration checking: conflicting resource, community ID. 
+--[[ Configuration checking: conflicting resource, conflicting resource, community ID. 
 	 player_is_emerg_driver: loop updating vehicle, trailer, checking seat and disabling controls.]]
 CreateThread(function()
 	if not UTIL:IsValidEnviroment() then
@@ -102,7 +109,6 @@ CreateThread(function()
 		Wait(1)
 	end
 end)
-
 
 ------ON VEHICLE EXIT EVENT TRIGGER------
 CreateThread(function()
@@ -186,7 +192,7 @@ end)
 RegisterCommand('lvclock', function(source, args)
 	if player_is_emerg_driver then
 		key_lock = not key_lock
-		AUDIO:Play('key_lock', AUDIO.lock_volume, true)
+		AUDIO:Play('Key_Lock', AUDIO.lock_volume, true)
 		HUD:SetItemState('lock', key_lock)
 		--if HUD is visible do not show notification
 		if not HUD:GetHudState() then
@@ -199,7 +205,7 @@ RegisterCommand('lvclock', function(source, args)
 	end
 end)
 
-RegisterKeyMapping('lvclock', 'LVC: Lock out controls', 'keyboard', lockout_default_hotkey)
+RegisterKeyMapping('lvclock', 'LVC: Lock out controls', 'keyboard', SETTINGS.lockout_default_hotkey)
 
 ------------------------------------------------
 --Dynamically Run RegisterCommand and KeyMapping functions for all 14 possible sirens
@@ -235,9 +241,9 @@ RegisterKeyMaps = function()
 		end)
 
 		--CHANGE BELOW if you'd like to change which keys are used for example NUMROW1 through 0
-		if tone < 11 and main_siren_set_register_keys_set_defaults then
+		if tone < 11 and SETTINGS.main_siren_set_register_keys_set_defaults then
 			RegisterKeyMapping(command, description, 'keyboard', tone)
-		elseif tone == 11 and main_siren_set_register_keys_set_defaults then
+		elseif tone == 11 and SETTINGS.main_siren_set_register_keys_set_defaults then
 			RegisterKeyMapping(command, description, 'keyboard', '0')
 		else
 			RegisterKeyMapping(command, description, 'keyboard', '')
@@ -272,7 +278,7 @@ end)
 -------------------FUNCTIONS--------------------
 ------------------------------------------------
 --Request new script audio bank, unloading the oldest (FIFO) down to 7 due to limitations.
-function ReqAudioBank(bank)
+local function ReqAudioBank(bank)
 	while #loaded_banks > 6 do
 		ReleaseNamedScriptAudioBank(loaded_banks[7])
 		ReleaseScriptAudioBank()
@@ -293,7 +299,6 @@ function ReqAudioBank(bank)
 	end
 	RequestScriptAudioBank(bank, false)
 	UTIL:Print(('^4LVC ^5AUDIOBANKS: ^7 Requesting "%s"'):format(bank))
-
 	Wait(50)
 end
 
@@ -371,6 +376,9 @@ end
 ---------------------------------------------------------------------
 function SetLxSirenStateForVeh(veh, newstate, vcfid, mode_id)
 	local vcfid = vcfid or VCF_ID
+	if vcfid == nil or VCFs[vcfid] == nil or VCFs[vcfid].SIRENS == nil then
+		UTIL:Print(string.format('^3LVC Development Log: vcfid: %s VCF_ID: %s VCFs: %s', vcfid, VCF_ID, json.encode(VCFs)), true)
+	end
 	local sirens = VCFs[vcfid].SIRENS
 	local mode_id = mode_id or MCTRL:GetSirenMode()
 	local mode = MCTRL:GetSirenModeTable(mode_id)
@@ -402,6 +410,9 @@ end
 ---------------------------------------------------------------------
 function SetAuxiliaryStateForVeh(veh, newstate, vcfid, mode_id)
 	local vcfid = vcfid or VCF_ID
+	if vcfid == nil or VCFs[vcfid] == nil or VCFs[vcfid].SIRENS == nil then
+		UTIL:Print(string.format('^3LVC Development Log: vcfid: %s VCF_ID: %s VCFs: %s', vcfid, VCF_ID, json.encode(VCFs)), true)
+	end
 	local sirens = VCFs[vcfid].SIRENS
 	local mode_id = mode_id or MCTRL:GetSirenMode()
 	local mode = MCTRL:GetSirenModeTable(mode_id)
@@ -432,6 +443,9 @@ end
 ---------------------------------------------------------------------
 function SetAirManuStateForVeh(veh, newstate, vcfid, horn, mode_id)
 	local vcfid = vcfid or VCF_ID
+	if vcfid == nil or VCFs[vcfid] == nil or VCFs[vcfid].SIRENS == nil or VCFs[vcfid].HORNS == nil then
+		UTIL:Print(string.format('^3LVC Development Log: vcfid: %s VCF_ID: %s VCFs: %s', vcfid, VCF_ID, json.encode(VCFs)), true)
+	end
 	local horn = horn or false
 	local mode_id = mode_id or MCTRL:GetSirenMode()
 	local mode = MCTRL:GetSirenModeTable(mode_id)
@@ -618,6 +632,13 @@ end)
 ---------------------------------------------------------------------
 CreateThread(function()
 	Wait(500)
+	-- Cached Local Variables
+	local CONFIG = CONFIG
+	local HUD = HUD
+	local AUDIO = AUDIO
+	local MCTRL = MCTRL
+	local UTIL = UTIL
+	local STORAGE = STORAGE
 	while true do
 		CleanupSounds()
 		DistantCopCarSirens(false)
@@ -650,7 +671,6 @@ CreateThread(function()
 			--- IS EMERG VEHICLE ---
 			if GetVehicleClass(veh) == 18 then
 				if UpdateOnscreenKeyboard() ~= 0 and not IsEntityDead(veh) then
-					lights_on = IsVehicleSirenOn(veh)
 					--- SET INIT TABLE VALUES ---
 					if state_lxsiren[veh] == nil then
 						state_lxsiren[veh] = 0
@@ -667,7 +687,7 @@ CreateThread(function()
 					TogMuteDfltSrnForVeh(veh, true)
 
 					--- IF LIGHTS ARE OFF TURN OFF SIREN ---
-					if not lights_on and state_lxsiren[veh] > 0 then
+					if not IsVehicleSirenOn(veh) and state_lxsiren[veh] > 0 then
 						--	SAVE TONE BEFORE TURNING OFF
 						if not LVC.reset_standby then
 							LVC.main_mem = state_lxsiren[veh]
@@ -675,7 +695,7 @@ CreateThread(function()
 						SetLxSirenStateForVeh(veh, 0)
 						count_broadcast_timer = delay_broadcast_timer
 					end
-					if not lights_on and state_auxiliary[veh] > 0 then
+					if not IsVehicleSirenOn(veh) and state_auxiliary[veh] > 0 then
 						SetAuxiliaryStateForVeh(veh, 0)
 						count_broadcast_timer = delay_broadcast_timer
 					end
@@ -685,7 +705,7 @@ CreateThread(function()
 						if not key_lock and not AUDIO.radio_wheel_active then
 							------ TOG DFLT SRN LIGHTS ------
 							if IsDisabledControlJustReleased(0, 85) then
-								if lights_on then
+								if IsVehicleSirenOn(veh) then
 									AUDIO:Play('Off', AUDIO.off_volume)
 									--	SET NUI IMAGES
 									HUD:SetItemState('switch', false)
@@ -809,7 +829,7 @@ CreateThread(function()
 									actv_horn = false
 								end
 							end	
-		  
+		 
 
 							--AIRHORN AND MANU BUTTON SFX
 							if AUDIO.airhorn_sfx and actv_horn or actv_manu then
@@ -834,11 +854,11 @@ CreateThread(function()
 								IsDisabledControlJustReleased(0, 172) or
 								IsDisabledControlJustReleased(0, 19) or
 								IsDisabledControlJustReleased(0, 85)) then
-									if locked_press_count % reminder_rate == 0 then
+									if SETTINGS.locked_press_count % SETTINGS.reminder_rate == 0 then
 										AUDIO:Play('Locked_Press', AUDIO.lock_reminder_volume, true) -- lock reminder
-										HUD:ShowNotification('~y~~h~Reminder:~h~ ~s~Your siren control box is ~r~locked~s~.', true)
+										HUD:ShowNotification('~y~~h~Reminder:~h~ ~s~Your siren controller is ~r~locked~s~.', true)
 									end
-									locked_press_count = locked_press_count + 1
+									SETTINGS.locked_press_count = SETTINGS.locked_press_count + 1
 							end
 						end
 					end
@@ -883,7 +903,7 @@ CreateThread(function()
 				----- CONTROLS -----
 				if not IsPauseMenuActive() then
 					-- IND L
-					if IsDisabledControlJustReleased(0, left_signal_key) then -- INPUT_VEH_PREV_RADIO_TRACK
+					if IsDisabledControlJustReleased(0, SETTINGS.left_signal_key) then -- INPUT_VEH_PREV_RADIO_TRACK
 						local cstate = state_indic[veh]
 						if cstate == ind_state_l then
 							state_indic[veh] = ind_state_o
@@ -896,7 +916,7 @@ CreateThread(function()
 						count_ind_timer = 0
 						count_broadcast_timer = delay_broadcast_timer
 					-- IND R
-					elseif IsDisabledControlJustReleased(0, right_signal_key) then -- INPUT_VEH_NEXT_RADIO_TRACK
+					elseif IsDisabledControlJustReleased(0, SETTINGS.right_signal_key) then -- INPUT_VEH_NEXT_RADIO_TRACK
 						local cstate = state_indic[veh]
 						if cstate == ind_state_r then
 							state_indic[veh] = ind_state_o
@@ -909,10 +929,10 @@ CreateThread(function()
 						count_ind_timer = 0
 						count_broadcast_timer = delay_broadcast_timer
 					-- IND H
-					elseif IsControlPressed(0, hazard_key) then -- INPUT_FRONTEND_CANCEL / Backspace
+					elseif IsControlPressed(0, SETTINGS.hazard_key) then -- INPUT_FRONTEND_CANCEL / Backspace
 						if GetLastInputMethod(0) then -- last input was with kb
 							Wait(hazard_hold_duration)
-							if IsControlPressed(0, hazard_key) then -- INPUT_FRONTEND_CANCEL / Backspace
+							if IsControlPressed(0, SETTINGS.hazard_key) then -- INPUT_FRONTEND_CANCEL / Backspace
 								local cstate = state_indic[veh]
 								if cstate == ind_state_h then
 									state_indic[veh] = ind_state_o

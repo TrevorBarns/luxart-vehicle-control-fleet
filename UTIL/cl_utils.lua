@@ -115,7 +115,7 @@ function UTIL:UpdateCurrentVCFData(veh, reset)
 	local temp_peer_override = MCTRL:GetOverridePeerState()
 	local temp_siren_mode = MCTRL:GetSirenMode()
 
-	approved_VCF_IDs, profile = self:GetProfileFromTable('PROFILE', VCF_Assignments, veh)
+	approved_VCF_IDs, profile = self:GetProfileFromTable('PROFILE', SETTINGS.VCF_Assignments, veh)
 
 	VCF_ID = approved_VCF_IDs[VCF_index]
 	local profile_data = VCFs[VCF_ID]
@@ -156,7 +156,7 @@ function UTIL:UpdateCurrentVCFData(veh, reset)
 	-- Create VCF names tables
 	approved_VCF_names = {}
 	for i,v in ipairs(approved_VCF_IDs) do
-		approved_VCF_names[#approved_VCF_names+1] = { Name = string.sub(CONFIG.VCF_Files[v], 1, -5), Value = i}
+		approved_VCF_names[#approved_VCF_names+1] = { Name = string.sub(SETTINGS.VCF_Files[v], 1, -5), Value = i}
 	end
 
 end
@@ -379,7 +379,7 @@ function UTIL:IsValidEnviroment()
 		self:Print('^1CONFIG ERROR: INVALID RESOURCE NAME. PLEASE VERIFY RESOURCE FOLDER NAME READS "^3lvc_fleet^1" (CASE-SENSITIVE). THIS IS REQUIRED FOR PROPER SAVE / LOAD FUNCTIONALITY. PLEASE RENAME, REFRESH, AND ENSURE.', true)
 		return false
 	end
-	if CONFIG.community_id == nil or CONFIG.community_id == '' then
+	if SETTINGS.community_id == nil or SETTINGS.community_id == '' then
 		Wait(1000)
 		HUD:ShowNotification('~b~~h~LVC~h~ ~r~~h~CONFIG ERROR~h~~s~: COMMUNITY ID MISSING. SEE LOGS. CONTACT SERVER DEVELOPER.', true)
 		self:Print('^1CONFIG ERROR: COMMUNITY ID NOT SET, THIS IS REQUIRED TO PREVENT CONFLICTS FOR PLAYERS WHO PLAY ON MULTIPLE SERVERS WITH LVC. PLEASE SET THIS IN SETTINGS.LUA.', true)

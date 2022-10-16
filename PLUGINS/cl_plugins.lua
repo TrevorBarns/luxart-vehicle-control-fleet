@@ -28,7 +28,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 --	Draws specific button with callback to plugins menu if the plugin is found and enabled. (controlled in plugins settings file)
 CreateThread(function()
 	while true do
-		while plugins_installed and IsMenuOpen() do
+		while SETTINGS.plugins_installed and IsMenuOpen() do
 			RageUI.IsVisible(RMenu:Get('lvc', 'plugins'), function()
 				-----------------------------------------------------------------------------------------------------------------
 				if tkd_masterswitch ~= nil then

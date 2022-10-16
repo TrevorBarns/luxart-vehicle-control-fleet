@@ -28,7 +28,7 @@ STORAGE = { }
 VCFs = { }
 VCFs.set = false
 
-local save_prefix = 'lvc:f_'..community_id..'_'
+local save_prefix = 'lvc:f_'..SETTINGS.community_id..'_'
 local repo_version = nil
 local custom_tone_names = false
 local VCFs_backup = nil

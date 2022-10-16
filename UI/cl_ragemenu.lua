@@ -74,7 +74,7 @@ local newer_version
 local version_description
 local version_formatted
 
-Keys.Register(open_menu_key, 'lvc', 'LVC: Open Menu', function()
+Keys.Register(SETTINGS.open_menu_key, 'lvc', 'LVC: Open Menu', function()
 	if not key_lock and player_is_emerg_driver and UpdateOnscreenKeyboard() ~= 0 and MENU.menu_access then
 		if UTIL:GetVehicleProfileName() == 'DEFAULT' then
 			local veh_name = GetDisplayNameFromVehicleModel(GetEntityModel(veh))
@@ -86,6 +86,7 @@ Keys.Register(open_menu_key, 'lvc', 'LVC: Open Menu', function()
 		RageUI.Visible(RMenu:Get('lvc', 'main'), not RageUI.Visible(RMenu:Get('lvc', 'main')))
 	end
 end)
+
 
 --Trims front off tone-strings longer than 36 characters for front-end display
 local function TrimToneString(tone_string)
@@ -324,7 +325,7 @@ CreateThread(function()
 				  end,
 				}, RMenu:Get('lvc', 'audiosettings'))
 				RageUI.Separator('Miscellaneous')
-				if plugins_installed then
+				if SETTINGS.plugins_installed then
 					RageUI.Button('Plugins', 'Open Plugins Menu.', {RightLabel = '→→→'}, true, {
 					  onSelected = function()
 					  end,
@@ -473,11 +474,11 @@ CreateThread(function()
 					RageUI.Checkbox('Radio Controls', 'When enabled, the ~b~tilde~s~ will act as a radio wheel key.', AUDIO.radio, {}, {
 					  onChecked = function()
 						  AUDIO.radio = true
-						  SetVehicleRadioEnabled(veh, AUDIO.radio)
+						  SetVehicleRadioEnabled(veh, true)
 					  end,
 					  onUnChecked = function()
 						  AUDIO.radio = false
-						  SetVehicleRadioEnabled(veh, AUDIO.radio)
+						  SetVehicleRadioEnabled(veh, false)
 					  end,
 					})
 				end
