@@ -76,31 +76,13 @@ local loaded_banks = {}
 local RegisterKeyMaps, MakeOrdinal
 
 ----------------THREADED FUNCTIONS----------------
---[[ Configuration checking: conflicting resource, conflicting resource, community ID. 
+--[[ Configuration checking: conflicting resource, community ID. 
 	 player_is_emerg_driver: loop updating vehicle, trailer, checking seat and disabling controls.]]
 CreateThread(function()
-	local lux_vehcontrol_state = GetResourceState('lux_vehcontrol') == 'started' 
-	local lvc_state = GetResourceState('lvc') == 'started' 
-	local qb_extras_state = GetResourceState('qb-extras') == 'started' 
-	if lux_vehcontrol_state or lvc_state or qb_extras_state then
-		Wait(1000)
-		HUD:ShowNotification('~b~~h~LVC~h~ ~r~~h~CONFLICT ERROR~h~~s~: RESOURCE CONFLICT. SEE CONSOLE.', true)
-		UTIL:Print('^1LVC ERROR: DETECTED CONFLICTING RESOURCE, PLEASE VERIFY THAT "^3lux_vehcontrol^1", "^3lvc^1", OR "^3qb-extras^1" ARE NOT RUNNING.', true)
+	if not UTIL:IsValidEnviroment() then
 		return
 	end
-	if GetCurrentResourceName() ~= 'lvc_fleet' then
-		Wait(1000)
-		HUD:ShowNotification('~b~~h~LVC~h~ ~r~~h~CONFIG ERROR~h~~s~: INVALID RESOURCE NAME. SEE LOGS. CONTRACT SERVER DEVELOPER.', true)
-		UTIL:Print('^1CONFIG ERROR: INVALID RESOURCE NAME. PLEASE VERIFY RESOURCE FOLDER NAME READS "^3lvc_fleet^1" (CASE-SENSITIVE). THIS IS REQUIRED FOR PROPER SAVE / LOAD FUNCTIONALITY. PLEASE RENAME, REFRESH, AND ENSURE.', true)
-		return
-	end
-	if community_id == nil or community_id == '' then
-		Wait(1000)
-		HUD:ShowNotification('~b~~h~LVC~h~ ~r~~h~CONFIG ERROR~h~~s~: COMMUNITY ID MISSING. SEE LOGS. CONTACT SERVER DEVELOPER.', true)
-		UTIL:Print('^1CONFIG ERROR: COMMUNITY ID NOT SET, THIS IS REQUIRED TO PREVENT CONFLICTS FOR PLAYERS WHO PLAY ON MULTIPLE SERVERS WITH LVC. PLEASE SET THIS IN SETTINGS.LUA.', true)
-		return
-	end
-
+	
 	while true do
 		playerped = GetPlayerPed(-1)
 		--IS IN VEHICLE
