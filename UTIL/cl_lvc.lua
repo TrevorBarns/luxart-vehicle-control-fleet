@@ -35,8 +35,6 @@ player_is_emerg_driver = false
 debug_mode = false
 
 --LOCAL VARIABLES
-local radioWheelActive = false
-
 local count_broadcast_timer = 0
 local delay_broadcast_timer = 500
 
@@ -105,28 +103,6 @@ CreateThread(function()
 	end
 end)
 
------------AUXILIARY CONTROL HANDLING------------
---	Handles radio wheel controls and default horn on siren change playback. 
-CreateThread(function()
-	while true do
-		while player_is_emerg_driver do
-			-- RADIO WHEEL
-			if IsControlPressed(0, 243) and AUDIO.radio then
-				while IsControlPressed(0, 243) do
-					radioWheelActive = true
-					SetControlNormal(0, 85, 1.0)
-					Wait(0)
-				end
-				Wait(100)
-				radioWheelActive = false
-			else
-				DisableControlAction(0, 85, true) -- INPUT_VEH_RADIO_WHEEL
-			end
-			Wait(0)
-		end
-		Wait(200)
-	end
-end)
 
 ------ON VEHICLE EXIT EVENT TRIGGER------
 CreateThread(function()
@@ -706,7 +682,7 @@ CreateThread(function()
 
 					----- CONTROLS -----
 					if not IsPauseMenuActive() then
-						if not key_lock and not radioWheelActive then
+						if not key_lock and not AUDIO.radio_wheel_active then
 							------ TOG DFLT SRN LIGHTS ------
 							if IsDisabledControlJustReleased(0, 85) then
 								if lights_on then
@@ -853,7 +829,7 @@ CreateThread(function()
 									AUDIO:Play('Release', AUDIO.upgrade_volume)
 								end
 							end
-						else
+						elseif not AUDIO.radio_wheel_active then
 							if (IsDisabledControlJustReleased(0, 86) or
 								IsDisabledControlJustReleased(0, 172) or
 								IsDisabledControlJustReleased(0, 19) or
