@@ -52,7 +52,6 @@ local pairs = pairs
 local table = table
 local string = string
 
-local locked_press_count = 0
 local count_broadcast_timer = 0
 local delay_broadcast_timer = 500
 
@@ -635,14 +634,15 @@ CreateThread(function()
 	while VCF_ID == nil do
 		Wait(100)
 	end
-
+	
 	-- Cached Local Variables
-	local CONFIG = CONFIG
+	local SETTINGS = SETTINGS
 	local HUD = HUD
 	local AUDIO = AUDIO
 	local MCTRL = MCTRL
 	local UTIL = UTIL
 	local STORAGE = STORAGE
+	
 	while true do
 		CleanupSounds()
 		DistantCopCarSirens(false)
@@ -935,7 +935,7 @@ CreateThread(function()
 					-- IND H
 					elseif IsControlPressed(0, SETTINGS.hazard_key) then -- INPUT_FRONTEND_CANCEL / Backspace
 						if GetLastInputMethod(0) then -- last input was with kb
-							Wait(hazard_hold_duration)
+							Wait(SETTINGS.hazard_hold_duration)
 							if IsControlPressed(0, SETTINGS.hazard_key) then -- INPUT_FRONTEND_CANCEL / Backspace
 								local cstate = state_indic[veh]
 								if cstate == ind_state_h then
