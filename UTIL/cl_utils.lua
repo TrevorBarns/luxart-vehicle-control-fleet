@@ -31,7 +31,7 @@ SIRENS = { }
 MENU = { }
 VCF_ID = nil
 
-local CONFIG = CONFIG
+local SETTINGS = SETTINGS
 local approved_VCF_IDs = { }
 local approved_VCF_names = { }
 VCF_index = nil
