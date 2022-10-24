@@ -24,9 +24,9 @@ dependencies {
 }
 
 files({
-	'UI/html/index.html',
-	'UI/html/lvc.js',
-	'UI/html/style.css',
+    'UI/html/index.html',
+    'UI/html/lvc.js',
+    'UI/html/style.css',
 	'UI/sounds/*.ogg',
 	'UI/sounds/**/*.ogg',
 	'UI/textures/**/*.png',
@@ -74,7 +74,6 @@ client_scripts {
 	'SIRENS.lua',
 	'/UTIL/cl_*.lua',
 	'/UI/cl_*.lua',
-	'/PLUGINS/cl_plugins.lua',
 	'/PLUGINS/**/SETTINGS.lua',
 	'/PLUGINS/**/cl_*.lua',
 }
