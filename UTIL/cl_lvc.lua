@@ -417,7 +417,7 @@ function SetAuxiliaryStateForVeh(veh, newstate, vcfid, mode_id)
 	local mode = MCTRL:GetSirenModeTable(mode_id)
 
 	if DoesEntityExist(veh) and not IsEntityDead(veh) then
-		if mode.bank ~= nil and newstate ~= state_auxiliary[veh] and newstate ~= nil then
+		if newstate ~= state_auxiliary[veh] or mode_id ~= state_mode[veh] and newstate ~= nil then
 			if snd_auxilary[veh] ~= nil then
 				StopSound(snd_auxilary[veh])
 				ReleaseSoundId(snd_auxilary[veh])
