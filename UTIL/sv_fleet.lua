@@ -190,7 +190,7 @@ CreateThread( function()
 				print('\t^7|______________________________________________________________|')
 				print('\t|\t^8                CONFIGURATION ERROR                    ^7|')
 				print('\t|^8 INVALID RESOURCE NAME. PLEASE VERIFY RESOURCE FOLDER NAME    ^7|')
-				print('\t|^8 READS \'^3lvc-fleet^8\' (CASE-SENSITIVE). THIS IS REQUIRED FOR     ^7|')
+				print('\t|^8 READS \'^3lvc_fleet^8\' (CASE-SENSITIVE). THIS IS REQUIRED FOR     ^7|')
 				print('\t|^8 PROPER SAVE / LOAD FUNCTIONALITY. ^3PLEASE RENAME, REFRESH,    ^7|')
 				print('\t|^3 AND RESTART.                                                 ^7|')
 		end
