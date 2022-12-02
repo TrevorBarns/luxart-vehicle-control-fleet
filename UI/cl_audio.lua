@@ -1,6 +1,6 @@
 --[[
 ---------------------------------------------------
-LUXART VEHICLE CONTROL V3 (FOR FIVEM)
+LUXART VEHICLE CONTROL FLEET (FOR FIVEM)
 ---------------------------------------------------
 Coded by Lt.Caine
 ELS Clicks by Faction
@@ -24,17 +24,20 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ---------------------------------------------------
 ]]
 AUDIO = { }
+AUDIO.radio_wheel_active = false
+
 local activity_timer = 0
 local activity_reminder_lookup = { [2] = 30000, [3] = 60000, [4] = 120000, [5] = 300000, [6] = 600000 }
 
 ------ACTIVITY REMINDER FUNCTIONALITY------
 CreateThread(function()
+	local self = AUDIO
 	while true do
-		while player_is_emerg_driver and AUDIO.activity_reminder_interval_index ~= nil and AUDIO.activity_reminder_interval_index > 1 do
+		while player_is_emerg_driver and self.activity_reminder_interval_index ~= nil and self.activity_reminder_interval_index > 1 do
 			if IsVehicleSirenOn(veh) and state_lxsiren[veh] == 0 and state_auxiliary[veh] == 0 then
 				if activity_timer < 1 then
-					AUDIO:Play('Reminder', AUDIO.activity_reminder_volume)
-					AUDIO:ResetActivityTimer()
+					self:Play('Reminder', self.activity_reminder_volume)
+					self:ResetActivityTimer()
 				end
 			end
 			Wait(100)
@@ -45,33 +48,58 @@ end)
 
 -- Activity Reminder Timer
 CreateThread(function()
+	local self = AUDIO
 	while true do
-		while player_is_emerg_driver and AUDIO.activity_reminder_interval_index ~= nil and AUDIO.activity_reminder_interval_index > 1 and IsVehicleSirenOn(veh) and state_lxsiren[veh] == 0 and state_auxiliary[veh] == 0 do
+		while player_is_emerg_driver and self.activity_reminder_interval_index ~= nil and self.activity_reminder_interval_index > 1 and IsVehicleSirenOn(veh) and state_lxsiren[veh] == 0 and state_auxiliary[veh] == 0 do
 			if activity_timer > 1 then
 				Wait(1000)
 				activity_timer = activity_timer - 1000
 			else
 				Wait(100)
-				AUDIO:ResetActivityTimer()
+				self:ResetActivityTimer()
 			end
 		end
 		Wait(1000)
 	end
 end)
 
+--	Handles radio wheel controls and default horn on siren change playback. 
+CreateThread(function()
+	local self = AUDIO
+	while true do
+		while player_is_emerg_driver do
+			-- RADIO WHEEL
+			if IsControlPressed(0, 243) and self.radio then
+				while IsControlPressed(0, 243) do
+					self.radio_wheel_active = true
+					SetControlNormal(0, 85, 1.0)
+					Wait(0)
+				end
+				Wait(100)
+				self.radio_wheel_active = false
+			else
+				DisableControlAction(0, 85, true) -- INPUT_VEH_RADIO_WHEEL
+			end
+			Wait(0)
+		end
+		Wait(200)
+	end
+end)
+
+
 ---------------------------------------------------------------------
 --[[Play NUI front in audio.]]
-function AUDIO:Play(soundFile, soundVolume, schemeless)
+function AUDIO:Play(sound_file, sound_volume, schemeless)
 	self.scheme = self.schemes[self.scheme_index]
 	local schemeless = schemeless or false
 	if not schemeless then
-		soundFile = self.scheme .. '/' .. soundFile;
+		sound_file = self.scheme .. '/' .. sound_file;
 	end
 
 	SendNUIMessage({
 	  _type  = 'audio',
-	  file   = soundFile,
-	  volume = soundVolume
+	  file   = sound_file,
+	  volume = sound_volume
 	})
 end
 
@@ -96,5 +124,12 @@ function AUDIO:SetActivityReminderIndex(index)
 	end
 end
 
+--[[Setter for radio wheel and radio station]]
+function AUDIO:SetRadioState(station)
+	SetVehicleRadioEnabled(veh, self.radio)
+	SetVehRadioStation(veh, station)
+	Wait(500)
+	SetVehRadioStation(veh, station)
+end
 
 	

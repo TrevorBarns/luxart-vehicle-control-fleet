@@ -1,6 +1,6 @@
 --[[
 ---------------------------------------------------
-LUXART VEHICLE CONTROL V3 (FOR FIVEM)
+LUXART VEHICLE CONTROL FLEET (FOR FIVEM)
 ---------------------------------------------------
 Coded by Lt.Caine
 ELS Clicks by Faction
@@ -31,6 +31,7 @@ SIRENS = { }
 MENU = { }
 VCF_ID = nil
 
+local SETTINGS = SETTINGS
 local approved_VCF_IDs = { }
 local approved_VCF_names = { }
 VCF_index = nil
@@ -54,20 +55,20 @@ function UTIL:GetProfileFromTable(print_name, tbl, veh, ignore_missing_default)
 		if tbl[veh_name] ~= nil then							--Does profile exist as outlined in vehicle.meta
 			profile_table = tbl[veh_name]
 			profile = veh_name
-			UTIL:Print(('^4LVC(%s) ^5%s: ^7profile %s found for %s.'):format(STORAGE:GetCurrentVersion(), print_name, profile, veh_name))
+			self:Print(('^4LVC(%s) ^5%s: ^7profile %s found for %s.'):format(STORAGE:GetCurrentVersion(), print_name, profile, veh_name))
 		elseif tbl[trail_only_wildcard] ~= nil then				--Does profile exist using # as wildcard for any trailing digits.
 			profile_table = tbl[trail_only_wildcard]
 			profile = trail_only_wildcard
-			UTIL:Print(('^4LVC(%s) ^5%s: ^7profile %s found for %s.'):format(STORAGE:GetCurrentVersion(), print_name, profile, veh_name))
+			self:Print(('^4LVC(%s) ^5%s: ^7profile %s found for %s.'):format(STORAGE:GetCurrentVersion(), print_name, profile, veh_name))
 		elseif tbl[lead_and_trail_wildcard] ~= nil then			--Does profile exist using # as wildcard for any digits.
 			profile_table = tbl[lead_and_trail_wildcard]
 			profile = lead_and_trail_wildcard
-			UTIL:Print(('^4LVC(%s) ^5%s: ^7profile %s found for %s.'):format(STORAGE:GetCurrentVersion(), print_name, profile, veh_name))			
+			self:Print(('^4LVC(%s) ^5%s: ^7profile %s found for %s.'):format(STORAGE:GetCurrentVersion(), print_name, profile, veh_name))			
 		else
 			if tbl['DEFAULT'] ~= nil then
 				profile_table = tbl['DEFAULT']
 				profile = 'DEFAULT'
-				UTIL:Print(('^4LVC(%s) ^5%s: ^7using default profile for %s.'):format(STORAGE:GetCurrentVersion(), print_name, veh_name))
+				self:Print(('^4LVC(%s) ^5%s: ^7using default profile for %s.'):format(STORAGE:GetCurrentVersion(), print_name, veh_name))
 				if print_name == 'SIRENS' then
 					HUD:ShowNotification(('~b~LVC~s~: Using ~b~DEFAULT~s~ profile for \'~o~ %s ~s~\'.'):format(veh_name))
 				end
@@ -75,7 +76,7 @@ function UTIL:GetProfileFromTable(print_name, tbl, veh, ignore_missing_default)
 				profile_table = { }
 				profile = false
 				if not ignore_missing_default then
-					UTIL:Print(('^3LVC(%s) WARNING: "DEFAULT" table missing from %s table. Using empty table for %s.'):format(STORAGE:GetCurrentVersion(), print_name, veh_name), true)
+					self:Print(('^3LVC(%s) WARNING: "DEFAULT" table missing from %s table. Using empty table for %s.'):format(STORAGE:GetCurrentVersion(), print_name, veh_name), true)
 				end
 			end
 		end
@@ -83,7 +84,7 @@ function UTIL:GetProfileFromTable(print_name, tbl, veh, ignore_missing_default)
 		profile_table = { }
 		profile = false
 		HUD:ShowNotification(('~b~~h~LVC~h~ ~r~ERROR: %s attempted to get profile from nil table. See console.'):format(print_name), true)
-		UTIL:Print(('^1LVC(%s) ERROR: %s attempted to get profile from nil table. This is typically caused by an invalid character or missing { } brace in SIRENS.lua. (https://git.io/JDVhK)'):format(STORAGE:GetCurrentVersion(), print_name), true)
+		self:Print(('^1LVC(%s) ERROR: %s attempted to get profile from nil table. This is typically caused by an invalid character or missing { } brace in SIRENS.lua. (https://git.io/JDVhK)'):format(STORAGE:GetCurrentVersion(), print_name), true)
 	end
 	
 	return profile_table, profile
@@ -114,7 +115,7 @@ function UTIL:UpdateCurrentVCFData(veh, reset)
 	local temp_peer_override = MCTRL:GetOverridePeerState()
 	local temp_siren_mode = MCTRL:GetSirenMode()
 
-	approved_VCF_IDs, profile = UTIL:GetProfileFromTable('PROFILE', VCF_Assignments, veh)
+	approved_VCF_IDs, profile = self:GetProfileFromTable('PROFILE', SETTINGS.VCF_Assignments, veh)
 
 	VCF_ID = approved_VCF_IDs[VCF_index]
 	local profile_data = VCFs[VCF_ID]
@@ -141,7 +142,7 @@ function UTIL:UpdateCurrentVCFData(veh, reset)
 	LVC.rumbler_enabled = LVC.rumbler
 	
 	--Build options table
-	UTIL:BuildToneOptions()
+	self:BuildToneOptions()
 	
 	-- Restore previous override settings, unless resetting from Storage
 	if not reset then
@@ -155,7 +156,7 @@ function UTIL:UpdateCurrentVCFData(veh, reset)
 	-- Create VCF names tables
 	approved_VCF_names = {}
 	for i,v in ipairs(approved_VCF_IDs) do
-		approved_VCF_names[#approved_VCF_names+1] = { Name = string.sub(VCF_Files[v], 1, -5), Value = i}
+		approved_VCF_names[#approved_VCF_names+1] = { Name = string.sub(SETTINGS.VCF_Files[v], 1, -5), Value = i}
 	end
 
 end
@@ -304,27 +305,27 @@ function UTIL:TogVehicleExtras(veh, extra_id, state, repair)
 			-- Toggle Multiple Extras
 			if type(extra_id.toggle) == 'table' then
 				for i, singe_extra_id in ipairs(extra_id.toggle) do
-					UTIL:TogVehicleExtras(veh, singe_extra_id, state, extra_id.repair)
+					self:TogVehicleExtras(veh, singe_extra_id, state, extra_id.repair)
 				end
 			-- Toggle a Single Extra (no table)
 			else
-				UTIL:TogVehicleExtras(veh, extra_id.toggle, state, extra_id.repair)
+				self:TogVehicleExtras(veh, extra_id.toggle, state, extra_id.repair)
 			end
 		-- Toggle Different Extras Mode
 		elseif extra_id.add ~= nil and extra_id.remove ~= nil then
 			if type(extra_id.add) == 'table' then
 				for i, singe_extra_id in ipairs(extra_id.add) do
-					UTIL:TogVehicleExtras(veh, singe_extra_id, state, extra_id.repair)
+					self:TogVehicleExtras(veh, singe_extra_id, state, extra_id.repair)
 				end
 			else
-				UTIL:TogVehicleExtras(veh, extra_id.add, state, extra_id.repair)
+				self:TogVehicleExtras(veh, extra_id.add, state, extra_id.repair)
 			end
 			if type(extra_id.remove) == 'table' then
 				for i, singe_extra_id in ipairs(extra_id.remove) do
-					UTIL:TogVehicleExtras(veh, singe_extra_id, not state, extra_id.repair)
+					self:TogVehicleExtras(veh, singe_extra_id, not state, extra_id.repair)
 				end
 			else
-				UTIL:TogVehicleExtras(veh, extra_id.remove, not state, extra_id.repair)
+				self:TogVehicleExtras(veh, extra_id.remove, not state, extra_id.repair)
 			end
 		end
 	else
@@ -338,7 +339,7 @@ function UTIL:TogVehicleExtras(veh, extra_id, state, repair)
 				end
 				SetVehicleAutoRepairDisabled(veh, not repair)
 				SetVehicleExtra(veh, extra_id, false)
-				UTIL:Print(('^4LVC: ^7Toggling %s on'):format(extra_id), false)
+				self:Print(('^4LVC: ^7Toggling %s on'):format(extra_id), false)
 				SetVehicleAutoRepairDisabled(veh, false)
 				if repair then
 					for i = 0,6 do
@@ -351,9 +352,37 @@ function UTIL:TogVehicleExtras(veh, extra_id, state, repair)
 		else
 			if IsVehicleExtraTurnedOn(veh, extra_id) then
 				SetVehicleExtra(veh, extra_id, true)
-				UTIL:Print(('^4LVC: ^7Toggling extra %s off'):format(extra_id), false)
+				self:Print(('^4LVC: ^7Toggling extra %s off'):format(extra_id), false)
 			end
 		end
 	end
 	SetVehicleAutoRepairDisabled(veh, false)
+end
+
+---------------------------------------------------------------------
+--[[Verify LVC is configured and no known conflicting siren controllers are running]]
+function UTIL:IsValidEnviroment()
+	local lux_vehcontrol_state = GetResourceState('lux_vehcontrol') == 'started' 
+	local lvc_state = GetResourceState('lvc') == 'started' 
+	local qb_extras_state = GetResourceState('qb-extras') == 'started' 
+
+	if GetCurrentResourceName() ~= 'lvc_fleet' then
+		Wait(1000)
+		HUD:ShowNotification('~b~~h~LVC~h~ ~r~~h~CONFIG ERROR~h~~s~: INVALID RESOURCE NAME. SEE LOGS. CONTRACT SERVER DEVELOPER.', true)
+		self:Print('^1CONFIG ERROR: INVALID RESOURCE NAME. PLEASE VERIFY RESOURCE FOLDER NAME READS "^3lvc_fleet^1" (CASE-SENSITIVE). THIS IS REQUIRED FOR PROPER SAVE / LOAD FUNCTIONALITY. PLEASE RENAME, REFRESH, AND ENSURE.', true)
+		return false
+	end
+	if SETTINGS.community_id == nil or SETTINGS.community_id == '' then
+		Wait(1000)
+		HUD:ShowNotification('~b~~h~LVC~h~ ~r~~h~CONFIG ERROR~h~~s~: COMMUNITY ID MISSING. SEE LOGS. CONTACT SERVER DEVELOPER.', true)
+		self:Print('^1CONFIG ERROR: COMMUNITY ID NOT SET, THIS IS REQUIRED TO PREVENT CONFLICTS FOR PLAYERS WHO PLAY ON MULTIPLE SERVERS WITH LVC. PLEASE SET THIS IN SETTINGS.LUA.', true)
+		return false
+	end
+	if lux_vehcontrol_state or lvc_state or qb_extras_state then
+		Wait(1000)
+		HUD:ShowNotification('~b~~h~LVC~h~ ~r~~h~CONFLICT ERROR~h~~s~: RESOURCE CONFLICT. SEE CONSOLE.', true)
+		self:Print('^1LVC ERROR: DETECTED CONFLICTING RESOURCE, PLEASE VERIFY THAT "^3lux_vehcontrol^1", "^3lvc^1", OR "^3qb-extras^1" ARE NOT RUNNING.', true)
+		return false
+	end
+	return true
 end

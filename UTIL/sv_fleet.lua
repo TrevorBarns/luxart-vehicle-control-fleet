@@ -1,6 +1,6 @@
 --[[
 ---------------------------------------------------
-LUXART VEHICLE CONTROL V3 (FOR FIVEM)
+LUXART VEHICLE CONTROL FLEET (FOR FIVEM)
 ---------------------------------------------------
 Coded by Lt.Caine
 ELS Clicks by Faction
@@ -109,7 +109,7 @@ CreateThread( function()
 
   -- Get repo version for installed plugins
 	for name, _ in pairs(plugins_cv) do
-		PerformHttpRequest('https://raw.githubusercontent.com/TrevorBarns/luxart-vehicle-control/master/PLUGINS/'..name..'/version', function(err, responseText, headers)
+		PerformHttpRequest('https://raw.githubusercontent.com/TrevorBarns/luxart-vehicle-control-extras/master/Plugins/'..name..'/version', function(err, responseText, headers)
 			if responseText ~= nil and responseText ~= '' then
 				plugins_rv[name] = responseText:gsub('\n', '')
 			else
@@ -125,7 +125,7 @@ CreateThread( function()
 	print('\t|\t^8      / /___       ^7\\ V /       ^9/ /___                  ^7|')
 	print('\t|\t^8      \\____/uxart   ^7\\_/ ehicle ^9\\____/ontrol            ^7|')
 	print('\t|\t^4                  FLEET EDITION                        ^7|')
-	print(('\t|\t               COMMUNITY ID: %-26s|'):format(community_id))
+	print(('\t|\t               COMMUNITY ID: %-26s|'):format(SETTINGS.community_id))
 	print(('\t|\t              INSTALLED: %-30s|'):format(curr_version))
 	if not beta_checking then
 		print(('\t|\t                 LATEST: %-30s|'):format(repo_version))
@@ -137,7 +137,7 @@ CreateThread( function()
 	end
 	if GetResourceState('lux_vehcontrol') ~= 'started' and GetResourceState('lux_vehcontrol') ~= 'starting' and GetResourceState('lvc') ~= 'started' and GetResourceState('lvc') ~= 'starting' then
 		if GetCurrentResourceName() == 'lvc_fleet' then
-			if community_id ~= nil and community_id ~= '' then
+			if SETTINGS.community_id ~= nil and SETTINGS.community_id ~= '' then
 				--	STABLE UPDATE DETECTED
 				if curr_version < repo_version then
 					print('\t^7|______________________________________________________________|')
@@ -190,7 +190,7 @@ CreateThread( function()
 				print('\t^7|______________________________________________________________|')
 				print('\t|\t^8                CONFIGURATION ERROR                    ^7|')
 				print('\t|^8 INVALID RESOURCE NAME. PLEASE VERIFY RESOURCE FOLDER NAME    ^7|')
-				print('\t|^8 READS \'^3lvc-fleet^8\' (CASE-SENSITIVE). THIS IS REQUIRED FOR     ^7|')
+				print('\t|^8 READS \'^3lvc_fleet^8\' (CASE-SENSITIVE). THIS IS REQUIRED FOR     ^7|')
 				print('\t|^8 PROPER SAVE / LOAD FUNCTIONALITY. ^3PLEASE RENAME, REFRESH,    ^7|')
 				print('\t|^3 AND RESTART.                                                 ^7|')
 		end
@@ -211,7 +211,7 @@ end)
 -----------------LVC FLEET THREADS-----------------
 --Loads, Parses, and Rekeys VCF Files storing in VCFs[vcf_id(index)]
 CreateThread(function()
-	for id, filename in ipairs(VCF_Files) do	--table of VCF filenames in SETTINGS.lua
+	for id, filename in ipairs(SETTINGS.VCF_Files) do	--table of VCF filenames in SETTINGS.lua
 		local data = LoadResourceFile(GetCurrentResourceName(), 'VCF/'..filename)
 		if data then
 			DebugPrint('------------------------------------------------------')			
