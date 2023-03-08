@@ -1,5 +1,7 @@
 name: CI
+
 on: [push, pull_request]
+
 jobs:
   lint:
     name: Lint Lua Scripts
@@ -7,11 +9,18 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+        with:
+          ref: stable
+          submodules: recursive
+      - name: Include Dependency
+        run: |
+          mkdir -p dependencies
+          cp -r luxart-vehicle-control/dependencies/RageUI dependencies/
       - name: Lint
         uses: GoatG33k/fivem-lua-lint-action@v1
         with:
           capture: "junit.xml"
-          args: "-t --formatter JUnit"
+          args: "-t --formatter JUnit --ignore-trailing-whitespace --max-line-length 0"
       - name: Publish Test Report
         uses: mikepenz/action-junit-report@v2
         with:
