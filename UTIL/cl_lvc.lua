@@ -647,7 +647,9 @@ end)
 
 ---------------------------------------------------------------------
 CreateThread(function()
-	-- Wait for initial profile data to populate. After this override init profile data with new data onVehicleChange.
+	-- Load initial data for audio feedback, wait for initial profile data to populate. After this override init profile data with new data onVehicleChange.
+	VCF_index = 1
+	UTIL:UpdateCurrentVCFData(veh, true)
 	while VCF_ID == nil do
 		Wait(100)
 	end
