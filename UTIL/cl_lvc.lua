@@ -753,23 +753,22 @@ CreateThread(function()
 									if IsVehicleSirenOn(veh) then
 										local new_tone = nil
 										AUDIO:Play('Upgrade', AUDIO.upgrade_volume)
-										HUD:SetItemState('siren', true)
 										if LVC.reset_standby then
 											if MCTRL:GetSirenMode() == MCTRL.RUMBLER then
 												MCTRL:SetSirenMode(1)
 											end
 											new_tone = UTIL:GetNextSirenTone(0, veh, true)
-											SetLxSirenStateForVeh(veh, new_tone)
 										else
 											--	GET THE SAVED TONE VERIFY IT IS APPROVED, AND NOT DISABLED / BUTTON ONLY
 											local option = UTIL:GetToneOption(LVC.Main_Mem)
 											if option ~= 3 and option ~= 4 then
-												SetLxSirenStateForVeh(veh, LVC.Main_Mem)
+												new_tone = LVC.Main_Mem
 											else
 												new_tone = UTIL:GetNextSirenTone(0, veh, true)
-												SetLxSirenStateForVeh(veh, new_tone)
 											end
 										end
+										SetLxSirenStateForVeh(veh, new_tone)
+										HUD:SetItemState('siren', true)
 									end
 								else
 									AUDIO:Play('Downgrade', AUDIO.downgrade_volume)
