@@ -478,7 +478,6 @@ function SetAirManuStateForVeh(veh, newstate, vcfid, horn, mode_id)
 				snd_airmanu[veh] = nil
 			end
 			if newstate ~= 0 then
-
 				snd_airmanu[veh] = GetSoundId()
 				if horn then
 					if mode.bank ~= nil and horns[newstate][mode.bank] ~= nil then
@@ -511,7 +510,7 @@ AddEventHandler('lvc:TogIndicState_c', function(sender, newstate)
 	local player_s = GetPlayerFromServerId(sender)
 	local ped_s = GetPlayerPed(player_s)
 	if DoesEntityExist(ped_s) and not IsEntityDead(ped_s) then
-		if ped_s ~= GetPlayerPed(-1) then
+		if ped_s ~= playerped then
 			if IsPedInAnyVehicle(ped_s, false) then
 				local veh = GetVehiclePedIsUsing(ped_s)
 				TogIndicStateForVeh(veh, newstate)
@@ -526,7 +525,7 @@ AddEventHandler('lvc:TogDfltSrnMuted_c', function(sender, toggle)
 	local player_s = GetPlayerFromServerId(sender)
 	local ped_s = GetPlayerPed(player_s)
 	if DoesEntityExist(ped_s) and not IsEntityDead(ped_s) then
-		if ped_s ~= GetPlayerPed(-1) then
+		if ped_s ~= playerped then
 			if IsPedInAnyVehicle(ped_s, false) then
 				local veh = GetVehiclePedIsUsing(ped_s)
 				TogMuteDfltSrnForVeh(veh, toggle)
@@ -541,7 +540,7 @@ AddEventHandler('lvc:SetLxSirenState_c', function(sender, newstate, vcfid, mode)
 	local player_s = GetPlayerFromServerId(sender)
 	local ped_s = GetPlayerPed(player_s)
 	if DoesEntityExist(ped_s) and not IsEntityDead(ped_s) then
-		if ped_s ~= GetPlayerPed(-1) then
+		if ped_s ~= playerped then
 			if IsPedInAnyVehicle(ped_s, false) then
 				local veh = GetVehiclePedIsUsing(ped_s)
 				-- If the client is using local-override, switch to correct mode.
@@ -584,7 +583,7 @@ AddEventHandler('lvc:SetAuxilaryState_c', function(sender, newstate, vcfid, mode
 	local player_s = GetPlayerFromServerId(sender)
 	local ped_s = GetPlayerPed(player_s)
 	if DoesEntityExist(ped_s) and not IsEntityDead(ped_s) then
-		if ped_s ~= GetPlayerPed(-1) then
+		if ped_s ~= playerped then
 			if IsPedInAnyVehicle(ped_s, false) then
 				local veh = GetVehiclePedIsUsing(ped_s)
 				
@@ -614,7 +613,7 @@ AddEventHandler('lvc:SetAirManuState_c', function(sender, newstate, vcfid, using
 	local player_s = GetPlayerFromServerId(sender)
 	local ped_s = GetPlayerPed(player_s)
 	if DoesEntityExist(ped_s) and not IsEntityDead(ped_s) then
-		if ped_s ~= GetPlayerPed(-1) then
+		if ped_s ~= playerped then
 			if IsPedInAnyVehicle(ped_s, false) then
 				local veh = GetVehiclePedIsUsing(ped_s)
 				
@@ -689,7 +688,7 @@ CreateThread(function()
 
 
 			--- IS EMERG VEHICLE ---
-			if GetVehicleClass(veh) == 18 then
+			if player_is_emerg_driver then
 				if UpdateOnscreenKeyboard() ~= 0 and not IsEntityDead(veh) then
 					--- SET INIT TABLE VALUES ---
 					if state_lxsiren[veh] == nil then
@@ -735,7 +734,6 @@ CreateThread(function()
 									if trailer ~= nil and trailer ~= 0 then
 										SetVehicleSiren(trailer, false)
 									end
-
 								else
 									AUDIO:Play('On', AUDIO.on_volume) -- On
 									--	SET NUI IMAGES
