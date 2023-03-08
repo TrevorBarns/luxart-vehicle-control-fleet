@@ -59,7 +59,7 @@ end)
 local curr_version = semver(GetResourceMetadata(GetCurrentResourceName(), 'version', 0))
 local beta_checking = GetResourceMetadata(GetCurrentResourceName(), 'beta_checking', 0) == 'true'
 local experimental = GetResourceMetadata(GetCurrentResourceName(), 'experimental', 0) == 'true' 
-local debug_mode = GetResourceMetadata(GetCurrentResourceName(), 'debug_mode', 0) == 'true' 
+local debug_mode = GetResourceMetadata(GetCurrentResourceName(), 'debug_mode_server', 0) == 'true' 
 local repo_version = ''
 local repo_beta_version = ''
 
