@@ -8,12 +8,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Download Dependency
-        uses: actions/download-artifact@v2
+        uses: actions/checkout@v2
         with:
-          name: rageui
           repository: TrevorBarns/luxart-vehicle-control
           ref: stable
-          path: luxart-vehicle-control/dependencies/RageUI
+          path: rageui
+      - name: Copy Dependency
+        run: cp -r rageui luxart-vehicle-control/dependencies/
       - name: Lint
         uses: GoatG33k/fivem-lua-lint-action@v1
         with:
