@@ -406,7 +406,7 @@ CreateThread(function()
 			end)	
 			if MENU.menu_rumbler_options and LVC.rumbler then
 				RageUI.IsVisible(RMenu:Get('lvc', 'rumbler'), function()
-					RageUI.Checkbox('Enabled', 'Toggles controls for rumbler / howler functionality. ~c~(DEFAULT: LSHIFT+LALT)', LVC.rumbler_enabled, {}, {
+					RageUI.Checkbox('Enabled', 'Toggles controls for rumbler / howler functionality. ~c~(DEFAULT: LSHIFT+E)', LVC.rumbler_enabled, {}, {
 						onChecked = function()
 							LVC.rumbler_enabled = true
 						end,

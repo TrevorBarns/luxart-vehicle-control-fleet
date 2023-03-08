@@ -736,7 +736,7 @@ CreateThread(function()
 								end
 								AUDIO:ResetActivityTimer()
 							------ TOG LX SIREN ------
-							elseif IsDisabledControlJustReleased(0, 19) and not (IsControlPressed(0, 131) and LVC.rumbler_enabled) then
+							elseif IsDisabledControlJustReleased(0, 19) then
 								if state_lxsiren[veh] == 0 then
 									if IsVehicleSirenOn(veh) then
 										local new_tone = nil
@@ -819,15 +819,15 @@ CreateThread(function()
 								actv_manu = false
 							end
 
-							-- TOG RUMBLER
+							-- TOG RUMBLER (LSHIFT+E)
 							if LVC.rumbler and LVC.rumbler_enabled and IsControlPressed(0, 131) and MCTRL:GetSirenMode() ~= MCTRL.LOCAL then
-								if IsDisabledControlJustReleased(0, 19) and state_lxsiren[veh] > 0 then
+								if IsDisabledControlJustReleased(0, 86) and state_lxsiren[veh] > 0 then
 									MCTRL:SetTempRumblerMode(true)				
 								end
 							end
 							
 							-- HORN
-							if IsDisabledControlPressed(0, 86) then
+							if IsDisabledControlPressed(0, 86) and not (IsControlPressed(0, 131) and LVC.rumbler_enabled) then
 								actv_horn = true
 								AUDIO:ResetActivityTimer()
 								HUD:SetItemState('horn', true)
