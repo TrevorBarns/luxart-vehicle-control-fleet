@@ -188,6 +188,7 @@ RegisterCommand('lvcdebug', function(source, args)
 		UTIL:Print('^3LVC Info: debug mode not set. Please enter a vehicle and run the command again.', true)
 	end
 end)
+TriggerEvent('chat:addSuggestion', '/lvcdebug', 'Toggle Luxart Vehicle Control Debug Mode.')
 
 --Toggle control lock command
 RegisterCommand('lvclock', function(source, args)
@@ -205,8 +206,8 @@ RegisterCommand('lvclock', function(source, args)
 		end
 	end
 end)
-
 RegisterKeyMapping('lvclock', 'LVC: Lock out controls', 'keyboard', SETTINGS.lockout_default_hotkey)
+TriggerEvent('chat:addSuggestion', '/lvclock', 'Toggle Luxart Vehicle Control Keybinding Lockout.')
 
 ------------------------------------------------
 --Dynamically Run RegisterCommand and KeyMapping functions for all 14 possible sirens
@@ -266,13 +267,10 @@ end
 --On resource start/restart
 CreateThread(function()
 	debug_mode = GetResourceMetadata(GetCurrentResourceName(), 'debug_mode', 0) == 'true'
-	TriggerEvent('chat:addSuggestion', '/lvclock', 'Toggle Luxart Vehicle Control Keybinding Lockout.')
 	SetNuiFocus( false )
 
 	RegisterKeyMaps()
 	Wait(100)
-	local resourceName = string.lower( GetCurrentResourceName() )
-	SendNUIMessage( { _type = 'setResourceName', name = resourceName } )
 	CreateThread(MainThread)
 	if not SETTINGS.police_scanner then
 		SetAudioFlag('PoliceScannerDisabled', true)
