@@ -34,6 +34,10 @@ SETTINGS.right_signal_key = 83
 SETTINGS.hazard_hold_duration = 750
 --	Time in milliseconds backspace must be pressed to turn on / off hazard lights. 
 
+------------------PLUG-IN SUPPORT------------------
+SETTINGS.plugins_installed = false
+--	Enabled use of plugins, if installed.
+
 ---------------------VCF FILES---------------------
 SETTINGS.VCF_Files = {
 	'DEFAULT.xml',
@@ -42,7 +46,3 @@ SETTINGS.VCF_Files = {
 SETTINGS.VCF_Assignments = {
 	['DEFAULT'] = { 1 },
 }
-
-------------------PLUG-IN SUPPORT------------------
-SETTINGS.plugins_installed = true
-
