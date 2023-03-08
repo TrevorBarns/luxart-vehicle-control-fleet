@@ -120,6 +120,11 @@ function UTIL:UpdateCurrentVCFData(veh, reset)
 	VCF_ID = approved_VCF_IDs[VCF_index]
 	local profile_data = VCFs[VCF_ID]
 	
+	if profile_data == nil then
+		UTIL:Print("^3UTIL: profile_data was nil, loading failed.", true)
+		return
+	end
+
 	-- Import settings to global tables
 	for key,value in pairs(profile_data.AUDIO) do
 		AUDIO[key] = value
