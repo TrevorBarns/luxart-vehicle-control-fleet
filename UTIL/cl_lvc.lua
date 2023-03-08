@@ -87,8 +87,9 @@ CreateThread(function()
 		return
 	end
 	
+	Wait(500)
 	while true do
-		playerped = GetPlayerPed(-1)
+		playerped = PlayerPedId()
 		--IS IN VEHICLE
 		player_is_emerg_driver = false
 		if IsPedInAnyVehicle(playerped, false) then
@@ -105,7 +106,7 @@ CreateThread(function()
 				end
 			end
 		end
-		Wait(1)
+		Wait(0)
 	end
 end)
 
@@ -114,7 +115,7 @@ CreateThread(function()
 	while true do
 		if player_is_emerg_driver then
 			while playerped ~= nil and veh ~= nil do
-				if GetIsTaskActive(playerped, 2) and GetVehiclePedIsIn(ped, true) then
+				if GetIsTaskActive(playerped, 2) then
 					TriggerEvent('lvc:onVehicleExit')
 					Wait(1000)
 				end
@@ -128,13 +129,11 @@ end)
 ------VEHICLE CHANGE DETECTION AND TRIGGER------
 CreateThread(function()
 	while true do
-		if player_is_emerg_driver then
-			if last_veh == nil then
+		if last_veh == nil and IsPedInAnyVehicle(playerped, false) then
+			TriggerEvent('lvc:onVehicleChange')
+		else
+			if last_veh ~= veh then
 				TriggerEvent('lvc:onVehicleChange')
-			else
-				if last_veh ~= veh then
-					TriggerEvent('lvc:onVehicleChange')
-				end
 			end
 		end
 		Wait(1000)
@@ -163,11 +162,13 @@ RegisterNetEvent('lvc:onVehicleChange')
 AddEventHandler('lvc:onVehicleChange', function()
 	last_veh = veh
 	VCF_index = 1
-	UTIL:UpdateCurrentVCFData(veh, true)
-	STORAGE:LoadSettings()
-	RegisterKeyMaps()
-	HUD:RefreshHudItemStates()
-	AUDIO:SetRadioState('OFF')
+	if player_is_emerg_driver then
+		UTIL:UpdateCurrentVCFData(veh, true)
+		STORAGE:LoadSettings()
+		RegisterKeyMaps()
+		HUD:RefreshHudItemStates()
+		AUDIO:SetRadioState('OFF')
+	end
 end)
 
 
@@ -988,4 +989,4 @@ CreateThread(function()
 		end
 		Wait(0)
 	end
-end)
+end)end
