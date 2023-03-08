@@ -52,6 +52,7 @@ local pairs = pairs
 local table = table
 local string = string
 
+local main_thread_running = true
 local count_broadcast_timer = 0
 local delay_broadcast_timer = 500
 
@@ -209,6 +210,34 @@ end)
 RegisterKeyMapping('lvclock', 'LVC: Lock out controls', 'keyboard', SETTINGS.lockout_default_hotkey)
 TriggerEvent('chat:addSuggestion', '/lvclock', 'Toggle Luxart Vehicle Control Keybinding Lockout.')
 
+--Crash recovery command
+RegisterCommand('lvcrecovercrash', function()
+	if not main_thread_running then
+		local timer = 3000
+		local blocked = false
+		CreateThread(function()
+			while timer > 0 do
+				timer = timer - 1
+				if main_thread_running then
+					blocked = true
+				end
+				Wait(1)
+			end
+		end)
+		
+		if not blocked then
+			test = { test2 = { test3 = 3 } }
+			UTIL:Print("^3LVC Development Log: attempting to recover from a crash... This may not work. Please make a bug report with log file.", true)
+			HUD:ShowNotification("~r~LVC Log~w~: ~y~please make a bug report with log file~w~.", true)
+			HUD:ShowNotification("~r~LVC Log~w~: attempting to recover from a crash...", true)
+			CreateThread(MainThread)
+			return
+		end
+	end
+	UTIL:Print("^3LVC Development Log: unable to recover, appears to be running. ~y~Please make a bug report with log file~w~.", true)
+	HUD:ShowNotification("~r~LVC Log~w~: unable to recover, running. ~y~Please make a bug report with log file~w~.", true)
+end)
+TriggerEvent('chat:addSuggestion', '/lvcrecovercrash', 'Attempts to recover LVC after a crash.')
 ------------------------------------------------
 --Dynamically Run RegisterCommand and KeyMapping functions for all 14 possible sirens
 --Then at runtime 'slide' all sirens down removing any restricted sirens.
@@ -646,7 +675,7 @@ AddEventHandler('lvc:SetAirManuState_c', function(sender, newstate, vcfid, using
 end)
 
 ---------------------------------------------------------------------
-CreateThread(function()
+function MainThread()
 	-- Load initial data for audio feedback, wait for initial profile data to populate. After this override init profile data with new data onVehicleChange.
 	VCF_index = 1
 	UTIL:UpdateCurrentVCFData(veh, true)
@@ -663,6 +692,8 @@ CreateThread(function()
 	local STORAGE = STORAGE
 	
 	while true do
+		--	Crash recovery variable, resets to true at end of loop.
+		main_thread_running = false
 		CleanupSounds()
 		DistantCopCarSirens(false)
 		----- IS IN VEHICLE -----
@@ -990,6 +1021,7 @@ CreateThread(function()
 				end
 			end
 		end
+		main_thread_running = true
 		Wait(0)
 	end
-end)end
+end
