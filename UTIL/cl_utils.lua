@@ -179,6 +179,15 @@ function UTIL:GetCurrentVCFName()
 	return approved_VCF_names[VCF_index].Name
 end
 
+--[[Returns all approved VCF data]]
+function UTIL:GetApprovedVCFs()
+	local VCF_data = { }
+	for _, VCF_ID in pairs(self:GetApprovedVCFIds()) do
+		table.insert(VCF_data, VCFs[VCF_ID])
+	end
+	return VCF_data
+end
+
 ---------------------------------------------------------------------
 --[[Builds a table that we store tone_options in (disabled, button & cycle, cycle only, button only).
     Users can set default option of siren by using optional index .Option in SIREN_ASSIGNMENTS table in SIRENS.LUA]]
