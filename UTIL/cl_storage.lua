@@ -363,7 +363,7 @@ function STORAGE:LoadSettings(skip_vcf_id)
 			UTIL:Print('^4LVC ^5STORAGE: ^1vehicle profile name nil.', true)
 		end
 	else
-		UTIL:Print('^4LVC ^5STORAGE: ^3No save present.', true)
+		UTIL:Print('^4LVC ^5STORAGE: ^3No profile save present.', true)
 	end
 	UTIL:Print('^4LVC ^5STORAGE: ^7Finished Loading Settings...', true)
 end

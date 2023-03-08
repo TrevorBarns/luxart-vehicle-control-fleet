@@ -76,7 +76,7 @@ function UTIL:GetProfileFromTable(print_name, tbl, veh, ignore_missing_default)
 				profile_table = { }
 				profile = false
 				if not ignore_missing_default then
-					self:Print(('^3LVC(%s) WARNING: "DEFAULT" table missing from %s table. Using empty table for %s.'):format(STORAGE:GetCurrentVersion(), print_name, veh_name), true)
+					self:Print(('^3LVC(%s) WARNING: "DEFAULT" table missing from %s table. Using empty table for %s. (https://tinyurl.com/missing-default)'):format(STORAGE:GetCurrentVersion(), print_name, veh_name), true)
 				end
 			end
 		end
@@ -84,7 +84,7 @@ function UTIL:GetProfileFromTable(print_name, tbl, veh, ignore_missing_default)
 		profile_table = { }
 		profile = false
 		HUD:ShowNotification(('~b~~h~LVC~h~ ~r~ERROR: %s attempted to get profile from nil table. See console.'):format(print_name), true)
-		self:Print(('^1LVC(%s) ERROR: %s attempted to get profile from nil table. This is typically caused by an invalid character or missing { } brace in SIRENS.lua. (https://git.io/JDVhK)'):format(STORAGE:GetCurrentVersion(), print_name), true)
+		self:Print(('^1LVC(%s) ERROR: %s attempted to get profile from nil table. This is typically caused by an invalid character or missing { } brace in SIRENS.lua. (https://tinyurl.com/nil-table)'):format(STORAGE:GetCurrentVersion(), print_name), true)
 	end
 	
 	return profile_table, profile
@@ -92,7 +92,7 @@ end
 
 ---------------------------------------------------------------------
 --[[Shorten oversized <gameName> strings in SIREN_ASSIGNMENTS (SIRENS.LUA).
-    GTA only allows 11 characters. So to reduce confusion we'll shorten it if the user does not.]]
+    GTA only allows 11 characters. So to reduce confusion we'll shorten it if the user does not. Also upper gameName for ignoring case.]]
 function UTIL:FixOversizeKeys(TABLE)
 	for i, tbl in pairs(TABLE) do
 		if string.len(i) > 11 then
@@ -104,7 +104,7 @@ function UTIL:FixOversizeKeys(TABLE)
 end
 
 ---------------------------------------------------------------------
---[[get approved VCF IDs, sets initial VCF, copys VCF data to existing tables AUDIO, HUD, LVC]]
+--[[Get approved VCF IDs, sets initial VCF, copys VCF data to existing tables AUDIO, HUD, LVC]]
 function UTIL:UpdateCurrentVCFData(veh, reset)
 	local reset = reset or false
 	while VCFs.set ==  false or MCTRL == nil do

@@ -158,6 +158,7 @@ AddEventHandler('lvc:onVehicleExit', function()
 	end
 end)
 
+--[[On vehicle change, update last_veh to prevent future update, set the initial VCF_Index back to 1 and load VCF data for that index, then load settings ontop of defaults.]]
 RegisterNetEvent('lvc:onVehicleChange')
 AddEventHandler('lvc:onVehicleChange', function()
 	last_veh = veh
@@ -175,7 +176,7 @@ end)
 RegisterCommand('lvcdebug', function(source, args)
 	if player_is_emerg_driver then
 		debug_mode = not debug_mode
-		UTIL:Print(json.encode(approved_VCF_profiles))
+		UTIL:Print(("^4LVC ^5VCF Data:^7 %s"):format(json.encode(UTIL:GetApprovedVCFs())))
 		HUD:ShowNotification(('~y~~h~Info:~h~ ~s~debug mode set to %s. See console.'):format(debug_mode), true)
 		UTIL:Print(('^3LVC Info: debug mode set to %s temporarily. Debug_mode resets after resource restart unless set in fxmanifest. Make sure to run "refresh" to see fxmanifest changes.'):format(debug_mode), true)
 		if debug_mode then
@@ -310,6 +311,7 @@ function ReqAudioBank(bank)
 end
 
 ---------------------------------------------------------------------
+--	Clear nonexistant or destroyed entities whos sound ID (snd_XXX) is still present.
 local function CleanupSounds()
 	if count_sndclean_timer > delay_sndclean_timer then
 		count_sndclean_timer = 0
@@ -382,16 +384,20 @@ end
 
 ---------------------------------------------------------------------
 function SetLxSirenStateForVeh(veh, newstate, vcfid, mode_id)
+	-- optional argument vcfid, only passed from peers, own client will use VCF_ID.
 	local vcfid = vcfid or VCF_ID
 	if vcfid == nil or VCFs[vcfid] == nil or VCFs[vcfid].SIRENS == nil then
 		UTIL:Print(string.format('^3LVC Development Log: vcfid: %s VCF_ID: %s VCFs: %s', vcfid, VCF_ID, json.encode(VCFs)), true)
 	end
 	local sirens = VCFs[vcfid].SIRENS
+	-- mode_id from peer, or current client mode see cl_modes.lua for ENUM.
 	local mode_id = mode_id or MCTRL:GetSirenMode()
+	--	mode string, ref, and bank dereferenced from mode_id
 	local mode = MCTRL:GetSirenModeTable(mode_id)
 
 	if DoesEntityExist(veh) and not IsEntityDead(veh) then
 		if newstate ~= state_lxsiren[veh] or mode_id ~= state_mode[veh] and newstate ~= nil then
+			-- stop Siren sound
 			if snd_lxsiren[veh] ~= nil then
 				StopSound(snd_lxsiren[veh])
 				ReleaseSoundId(snd_lxsiren[veh])
@@ -402,6 +408,7 @@ function SetLxSirenStateForVeh(veh, newstate, vcfid, mode_id)
 					ReqAudioBank(sirens[newstate][mode.bank])
 				end
 				snd_lxsiren[veh] = GetSoundId()
+				-- if siren string is not set in VCF fallback on normal mode
 				if sirens[newstate][mode.string] == "" then
 					mode = MCTRL:GetSirenModeTable(MCTRL.NORMAL)
 				end
@@ -537,11 +544,12 @@ AddEventHandler('lvc:SetLxSirenState_c', function(sender, newstate, vcfid, mode)
 		if ped_s ~= GetPlayerPed(-1) then
 			if IsPedInAnyVehicle(ped_s, false) then
 				local veh = GetVehiclePedIsUsing(ped_s)
-				--Criteria for override enabled, same faction (LE,Fire,etc.) and not 0
+				-- If the client is using local-override, switch to correct mode.
 				if mode == 3 then
 					mode = 1 
 				end
 				
+				--Criteria for override enabled, same faction (LE,Fire,etc.) and not 0
 				if MCTRL:GetOverridePeerState() and VCFs[vcfid].LVC.faction == LVC.faction and newstate ~= 0 then
 					if MCTRL:GetSirenMode() == 3 then
 						mode = 3
