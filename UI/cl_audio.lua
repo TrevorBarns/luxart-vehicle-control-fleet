@@ -90,9 +90,11 @@ end)
 ---------------------------------------------------------------------
 --[[Play NUI front in audio.]]
 function AUDIO:Play(sound_file, sound_volume, schemeless)
-	self.scheme = self.schemes[self.scheme_index]
 	local schemeless = schemeless or false
+	-- game SFX normalized volume
+	sound_volume = sound_volume * GetProfileSetting(300) / 10
 	if not schemeless then
+		self.scheme = self.schemes[self.scheme_index]
 		sound_file = self.scheme .. '/' .. sound_file;
 	end
 
