@@ -281,7 +281,11 @@ end)
 -------------------FUNCTIONS--------------------
 ------------------------------------------------
 --Request new script audio bank, unloading the oldest (FIFO) down to 7 due to limitations.
-local function ReqAudioBank(bank)
+function ReqAudioBank(bank)
+	if bank == nil or bank == '' then
+		return
+	end
+	
 	while #loaded_banks > 6 do
 		ReleaseNamedScriptAudioBank(loaded_banks[7])
 		ReleaseScriptAudioBank()
