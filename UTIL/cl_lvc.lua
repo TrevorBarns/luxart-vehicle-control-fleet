@@ -412,7 +412,10 @@ function SetLxSirenStateForVeh(veh, newstate, vcfid, mode_id)
 					mode = MCTRL:GetSirenModeTable(MCTRL.NORMAL)
 				end
 				PlaySoundFromEntity(snd_lxsiren[veh], sirens[newstate][mode.string], veh, sirens[newstate][mode.ref], 0, 0)
-				TogMuteDfltSrnForVeh(veh, true)
+			else
+				if MCTRL:GetSirenMode() == MCTRL.RUMBLER then
+					MCTRL:SetTempRumblerMode(false, true)
+				end
 			end
 			state_lxsiren[veh] 	= newstate
 			state_mode[veh]		= mode_id
