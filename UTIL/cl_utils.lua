@@ -44,7 +44,8 @@ local profile = nil
 --[[Return sub-table for sirens or plugin settings tables, given veh, and name of whatever setting.]]
 function UTIL:GetProfileFromTable(print_name, tbl, veh, ignore_missing_default)
 	local ignore_missing_default = ignore_missing_default or false
-	local veh_name = GetDisplayNameFromVehicleModel(GetEntityModel(veh))
+	-- Ignore case of gameName
+	local veh_name = string.upper(GetDisplayNameFromVehicleModel(GetEntityModel(veh)))
 	local lead_and_trail_wildcard = veh_name:gsub('%d+', '#')
 	local lead = veh_name:match('%d*%a+')
 	local trail = veh_name:gsub(lead, ''):gsub('%d+', '#')
@@ -76,7 +77,7 @@ function UTIL:GetProfileFromTable(print_name, tbl, veh, ignore_missing_default)
 				profile_table = { }
 				profile = false
 				if not ignore_missing_default then
-					self:Print(('^3LVC(%s) WARNING: "DEFAULT" table missing from %s table. Using empty table for %s.'):format(STORAGE:GetCurrentVersion(), print_name, veh_name), true)
+					self:Print(('^3LVC(%s) WARNING: "DEFAULT" table missing from %s table. Using empty table for %s. (https://tinyurl.com/missing-default)'):format(STORAGE:GetCurrentVersion(), print_name, veh_name), true)
 				end
 			end
 		end
@@ -84,7 +85,7 @@ function UTIL:GetProfileFromTable(print_name, tbl, veh, ignore_missing_default)
 		profile_table = { }
 		profile = false
 		HUD:ShowNotification(('~b~~h~LVC~h~ ~r~ERROR: %s attempted to get profile from nil table. See console.'):format(print_name), true)
-		self:Print(('^1LVC(%s) ERROR: %s attempted to get profile from nil table. This is typically caused by an invalid character or missing { } brace in SIRENS.lua. (https://git.io/JDVhK)'):format(STORAGE:GetCurrentVersion(), print_name), true)
+		self:Print(('^1LVC(%s) ERROR: %s attempted to get profile from nil table. This is typically caused by an invalid character or missing { } brace in SIRENS.lua. (https://tinyurl.com/nil-table)'):format(STORAGE:GetCurrentVersion(), print_name), true)
 	end
 	
 	return profile_table, profile
@@ -92,11 +93,11 @@ end
 
 ---------------------------------------------------------------------
 --[[Shorten oversized <gameName> strings in SIREN_ASSIGNMENTS (SIRENS.LUA).
-    GTA only allows 11 characters. So to reduce confusion we'll shorten it if the user does not.]]
+    GTA only allows 11 characters. So to reduce confusion we'll shorten it if the user does not. Also upper gameName for ignoring case.]]
 function UTIL:FixOversizeKeys(TABLE)
 	for i, tbl in pairs(TABLE) do
 		if string.len(i) > 11 then
-			local shortened_gameName = string.sub(i,1,11)
+			local shortened_gameName = string.upper(string.sub(i,1,11))
 			TABLE[shortened_gameName] = TABLE[i]
 			TABLE[i] = nil
 		end
@@ -104,7 +105,7 @@ function UTIL:FixOversizeKeys(TABLE)
 end
 
 ---------------------------------------------------------------------
---[[get approved VCF IDs, sets initial VCF, copys VCF data to existing tables AUDIO, HUD, LVC]]
+--[[Get approved VCF IDs, sets initial VCF, copys VCF data to existing tables AUDIO, HUD, LVC]]
 function UTIL:UpdateCurrentVCFData(veh, reset)
 	local reset = reset or false
 	while VCFs.set ==  false or MCTRL == nil do
@@ -120,6 +121,11 @@ function UTIL:UpdateCurrentVCFData(veh, reset)
 	VCF_ID = approved_VCF_IDs[VCF_index]
 	local profile_data = VCFs[VCF_ID]
 	
+	if profile_data == nil then
+		UTIL:Print("^3UTIL: profile_data was nil, loading failed.", true)
+		return
+	end
+
 	-- Import settings to global tables
 	for key,value in pairs(profile_data.AUDIO) do
 		AUDIO[key] = value
@@ -137,6 +143,8 @@ function UTIL:UpdateCurrentVCFData(veh, reset)
 	HORNS = profile_data.HORNS
 	SIRENS = profile_data.SIRENS
 
+	-- HUD Options
+	HUD:SetHudState(HUD.enabled)
 	--Rumbler Settings
 	MCTRL:SetRumblerDurationIndex(LVC.rumbler_duration_index)
 	LVC.rumbler_enabled = LVC.rumbler
@@ -175,6 +183,15 @@ end
 --[[Returns name of the currently active VCF]]
 function UTIL:GetCurrentVCFName()
 	return approved_VCF_names[VCF_index].Name
+end
+
+--[[Returns all approved VCF data]]
+function UTIL:GetApprovedVCFs()
+	local VCF_data = { }
+	for _, VCF_ID in pairs(self:GetApprovedVCFIds()) do
+		table.insert(VCF_data, VCFs[VCF_ID])
+	end
+	return VCF_data
 end
 
 ---------------------------------------------------------------------

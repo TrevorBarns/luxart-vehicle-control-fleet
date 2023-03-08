@@ -52,6 +52,7 @@ local pairs = pairs
 local table = table
 local string = string
 
+local main_thread_running = true
 local count_broadcast_timer = 0
 local delay_broadcast_timer = 500
 
@@ -87,8 +88,9 @@ CreateThread(function()
 		return
 	end
 	
+	Wait(500)
 	while true do
-		playerped = GetPlayerPed(-1)
+		playerped = PlayerPedId()
 		--IS IN VEHICLE
 		player_is_emerg_driver = false
 		if IsPedInAnyVehicle(playerped, false) then
@@ -105,7 +107,7 @@ CreateThread(function()
 				end
 			end
 		end
-		Wait(1)
+		Wait(0)
 	end
 end)
 
@@ -114,7 +116,7 @@ CreateThread(function()
 	while true do
 		if player_is_emerg_driver then
 			while playerped ~= nil and veh ~= nil do
-				if GetIsTaskActive(playerped, 2) and GetVehiclePedIsIn(ped, true) then
+				if GetIsTaskActive(playerped, 2) then
 					TriggerEvent('lvc:onVehicleExit')
 					Wait(1000)
 				end
@@ -128,13 +130,11 @@ end)
 ------VEHICLE CHANGE DETECTION AND TRIGGER------
 CreateThread(function()
 	while true do
-		if player_is_emerg_driver then
-			if last_veh == nil then
+		if last_veh == nil and IsPedInAnyVehicle(playerped, false) then
+			TriggerEvent('lvc:onVehicleChange')
+		else
+			if last_veh ~= veh then
 				TriggerEvent('lvc:onVehicleChange')
-			else
-				if last_veh ~= veh then
-					TriggerEvent('lvc:onVehicleChange')
-				end
 			end
 		end
 		Wait(1000)
@@ -158,15 +158,18 @@ AddEventHandler('lvc:onVehicleExit', function()
 	end
 end)
 
+--[[On vehicle change, update last_veh to prevent future update, set the initial VCF_Index back to 1 and load VCF data for that index, then load settings ontop of defaults.]]
 RegisterNetEvent('lvc:onVehicleChange')
 AddEventHandler('lvc:onVehicleChange', function()
 	last_veh = veh
 	VCF_index = 1
-	UTIL:UpdateCurrentVCFData(veh, true)
-	STORAGE:LoadSettings()
-	RegisterKeyMaps()
-	HUD:RefreshHudItemStates()
-	AUDIO:SetRadioState('OFF')
+	if player_is_emerg_driver then
+		UTIL:UpdateCurrentVCFData(veh, true)
+		STORAGE:LoadSettings()
+		RegisterKeyMaps()
+		HUD:RefreshHudItemStates()
+		AUDIO:SetRadioState('OFF')
+	end
 end)
 
 
@@ -175,7 +178,7 @@ end)
 RegisterCommand('lvcdebug', function(source, args)
 	if player_is_emerg_driver then
 		debug_mode = not debug_mode
-		UTIL:Print(json.encode(approved_VCF_profiles))
+		UTIL:Print(("^4LVC ^5VCF Data:^7 %s"):format(json.encode(UTIL:GetApprovedVCFs())))
 		HUD:ShowNotification(('~y~~h~Info:~h~ ~s~debug mode set to %s. See console.'):format(debug_mode), true)
 		UTIL:Print(('^3LVC Info: debug mode set to %s temporarily. Debug_mode resets after resource restart unless set in fxmanifest. Make sure to run "refresh" to see fxmanifest changes.'):format(debug_mode), true)
 		if debug_mode then
@@ -186,6 +189,7 @@ RegisterCommand('lvcdebug', function(source, args)
 		UTIL:Print('^3LVC Info: debug mode not set. Please enter a vehicle and run the command again.', true)
 	end
 end)
+TriggerEvent('chat:addSuggestion', '/lvcdebug', 'Toggle Luxart Vehicle Control Debug Mode.')
 
 --Toggle control lock command
 RegisterCommand('lvclock', function(source, args)
@@ -203,9 +207,37 @@ RegisterCommand('lvclock', function(source, args)
 		end
 	end
 end)
-
 RegisterKeyMapping('lvclock', 'LVC: Lock out controls', 'keyboard', SETTINGS.lockout_default_hotkey)
+TriggerEvent('chat:addSuggestion', '/lvclock', 'Toggle Luxart Vehicle Control Keybinding Lockout.')
 
+--Crash recovery command
+RegisterCommand('lvcrecovercrash', function()
+	if not main_thread_running then
+		local timer = 3000
+		local blocked = false
+		CreateThread(function()
+			while timer > 0 do
+				timer = timer - 1
+				if main_thread_running then
+					blocked = true
+				end
+				Wait(1)
+			end
+		end)
+		
+		if not blocked then
+			test = { test2 = { test3 = 3 } }
+			UTIL:Print("^3LVC Development Log: attempting to recover from a crash... This may not work. Please make a bug report with log file.", true)
+			HUD:ShowNotification("~r~LVC Log~w~: ~y~please make a bug report with log file~w~.", true)
+			HUD:ShowNotification("~r~LVC Log~w~: attempting to recover from a crash...", true)
+			CreateThread(MainThread)
+			return
+		end
+	end
+	UTIL:Print("^3LVC Development Log: unable to recover, appears to be running. ~y~Please make a bug report with log file~w~.", true)
+	HUD:ShowNotification("~r~LVC Log~w~: unable to recover, running. ~y~Please make a bug report with log file~w~.", true)
+end)
+TriggerEvent('chat:addSuggestion', '/lvcrecovercrash', 'Attempts to recover LVC after a crash.')
 ------------------------------------------------
 --Dynamically Run RegisterCommand and KeyMapping functions for all 14 possible sirens
 --Then at runtime 'slide' all sirens down removing any restricted sirens.
@@ -264,20 +296,25 @@ end
 --On resource start/restart
 CreateThread(function()
 	debug_mode = GetResourceMetadata(GetCurrentResourceName(), 'debug_mode', 0) == 'true'
-	TriggerEvent('chat:addSuggestion', '/lvclock', 'Toggle Luxart Vehicle Control Keybinding Lockout.')
 	SetNuiFocus( false )
+	UTIL:FixOversizeKeys(SETTINGS.VCF_Assignments)
 
-	RegisterKeyMaps()
 	Wait(100)
-	local resourceName = string.lower( GetCurrentResourceName() )
-	SendNUIMessage( { _type = 'setResourceName', name = resourceName } )
+	CreateThread(MainThread)
+	if not SETTINGS.police_scanner then
+		SetAudioFlag('PoliceScannerDisabled', true)
+	end
 end)			
 
 ------------------------------------------------
 -------------------FUNCTIONS--------------------
 ------------------------------------------------
 --Request new script audio bank, unloading the oldest (FIFO) down to 7 due to limitations.
-local function ReqAudioBank(bank)
+function ReqAudioBank(bank)
+	if bank == nil or bank == '' then
+		return
+	end
+	
 	while #loaded_banks > 6 do
 		ReleaseNamedScriptAudioBank(loaded_banks[7])
 		ReleaseScriptAudioBank()
@@ -302,6 +339,7 @@ local function ReqAudioBank(bank)
 end
 
 ---------------------------------------------------------------------
+--	Clear nonexistant or destroyed entities whos sound ID (snd_XXX) is still present.
 local function CleanupSounds()
 	if count_sndclean_timer > delay_sndclean_timer then
 		count_sndclean_timer = 0
@@ -374,16 +412,20 @@ end
 
 ---------------------------------------------------------------------
 function SetLxSirenStateForVeh(veh, newstate, vcfid, mode_id)
+	-- optional argument vcfid, only passed from peers, own client will use VCF_ID.
 	local vcfid = vcfid or VCF_ID
 	if vcfid == nil or VCFs[vcfid] == nil or VCFs[vcfid].SIRENS == nil then
 		UTIL:Print(string.format('^3LVC Development Log: vcfid: %s VCF_ID: %s VCFs: %s', vcfid, VCF_ID, json.encode(VCFs)), true)
 	end
 	local sirens = VCFs[vcfid].SIRENS
+	-- mode_id from peer, or current client mode see cl_modes.lua for ENUM.
 	local mode_id = mode_id or MCTRL:GetSirenMode()
+	--	mode string, ref, and bank dereferenced from mode_id
 	local mode = MCTRL:GetSirenModeTable(mode_id)
 
 	if DoesEntityExist(veh) and not IsEntityDead(veh) then
 		if newstate ~= state_lxsiren[veh] or mode_id ~= state_mode[veh] and newstate ~= nil then
+			-- stop Siren sound
 			if snd_lxsiren[veh] ~= nil then
 				StopSound(snd_lxsiren[veh])
 				ReleaseSoundId(snd_lxsiren[veh])
@@ -394,11 +436,15 @@ function SetLxSirenStateForVeh(veh, newstate, vcfid, mode_id)
 					ReqAudioBank(sirens[newstate][mode.bank])
 				end
 				snd_lxsiren[veh] = GetSoundId()
+				-- if siren string is not set in VCF fallback on normal mode
 				if sirens[newstate][mode.string] == "" then
 					mode = MCTRL:GetSirenModeTable(MCTRL.NORMAL)
 				end
 				PlaySoundFromEntity(snd_lxsiren[veh], sirens[newstate][mode.string], veh, sirens[newstate][mode.ref], 0, 0)
-				TogMuteDfltSrnForVeh(veh, true)
+			else
+				if MCTRL:GetSirenMode() == MCTRL.RUMBLER then
+					MCTRL:SetTempRumblerMode(false, true)
+				end
 			end
 			state_lxsiren[veh] 	= newstate
 			state_mode[veh]		= mode_id
@@ -463,7 +509,6 @@ function SetAirManuStateForVeh(veh, newstate, vcfid, horn, mode_id)
 				snd_airmanu[veh] = nil
 			end
 			if newstate ~= 0 then
-
 				snd_airmanu[veh] = GetSoundId()
 				if horn then
 					if mode.bank ~= nil and horns[newstate][mode.bank] ~= nil then
@@ -496,7 +541,7 @@ AddEventHandler('lvc:TogIndicState_c', function(sender, newstate)
 	local player_s = GetPlayerFromServerId(sender)
 	local ped_s = GetPlayerPed(player_s)
 	if DoesEntityExist(ped_s) and not IsEntityDead(ped_s) then
-		if ped_s ~= GetPlayerPed(-1) then
+		if ped_s ~= playerped then
 			if IsPedInAnyVehicle(ped_s, false) then
 				local veh = GetVehiclePedIsUsing(ped_s)
 				TogIndicStateForVeh(veh, newstate)
@@ -511,7 +556,7 @@ AddEventHandler('lvc:TogDfltSrnMuted_c', function(sender, toggle)
 	local player_s = GetPlayerFromServerId(sender)
 	local ped_s = GetPlayerPed(player_s)
 	if DoesEntityExist(ped_s) and not IsEntityDead(ped_s) then
-		if ped_s ~= GetPlayerPed(-1) then
+		if ped_s ~= playerped then
 			if IsPedInAnyVehicle(ped_s, false) then
 				local veh = GetVehiclePedIsUsing(ped_s)
 				TogMuteDfltSrnForVeh(veh, toggle)
@@ -526,14 +571,15 @@ AddEventHandler('lvc:SetLxSirenState_c', function(sender, newstate, vcfid, mode)
 	local player_s = GetPlayerFromServerId(sender)
 	local ped_s = GetPlayerPed(player_s)
 	if DoesEntityExist(ped_s) and not IsEntityDead(ped_s) then
-		if ped_s ~= GetPlayerPed(-1) then
+		if ped_s ~= playerped then
 			if IsPedInAnyVehicle(ped_s, false) then
 				local veh = GetVehiclePedIsUsing(ped_s)
-				--Criteria for override enabled, same faction (LE,Fire,etc.) and not 0
+				-- If the client is using local-override, switch to correct mode.
 				if mode == 3 then
 					mode = 1 
 				end
 				
+				--Criteria for override enabled, same faction (LE,Fire,etc.) and not 0
 				if MCTRL:GetOverridePeerState() and VCFs[vcfid].LVC.faction == LVC.faction and newstate ~= 0 then
 					if MCTRL:GetSirenMode() == 3 then
 						mode = 3
@@ -568,7 +614,7 @@ AddEventHandler('lvc:SetAuxilaryState_c', function(sender, newstate, vcfid, mode
 	local player_s = GetPlayerFromServerId(sender)
 	local ped_s = GetPlayerPed(player_s)
 	if DoesEntityExist(ped_s) and not IsEntityDead(ped_s) then
-		if ped_s ~= GetPlayerPed(-1) then
+		if ped_s ~= playerped then
 			if IsPedInAnyVehicle(ped_s, false) then
 				local veh = GetVehiclePedIsUsing(ped_s)
 				
@@ -598,7 +644,7 @@ AddEventHandler('lvc:SetAirManuState_c', function(sender, newstate, vcfid, using
 	local player_s = GetPlayerFromServerId(sender)
 	local ped_s = GetPlayerPed(player_s)
 	if DoesEntityExist(ped_s) and not IsEntityDead(ped_s) then
-		if ped_s ~= GetPlayerPed(-1) then
+		if ped_s ~= playerped then
 			if IsPedInAnyVehicle(ped_s, false) then
 				local veh = GetVehiclePedIsUsing(ped_s)
 				
@@ -629,8 +675,10 @@ AddEventHandler('lvc:SetAirManuState_c', function(sender, newstate, vcfid, using
 end)
 
 ---------------------------------------------------------------------
-CreateThread(function()
-	-- Wait for initial profile data to populate. After this override init profile data with new data onVehicleChange.
+function MainThread()
+	-- Load initial data for audio feedback, wait for initial profile data to populate. After this override init profile data with new data onVehicleChange.
+	VCF_index = 1
+	UTIL:UpdateCurrentVCFData(veh, true)
 	while VCF_ID == nil do
 		Wait(100)
 	end
@@ -644,6 +692,8 @@ CreateThread(function()
 	local STORAGE = STORAGE
 	
 	while true do
+		--	Crash recovery variable, resets to true at end of loop.
+		main_thread_running = false
 		CleanupSounds()
 		DistantCopCarSirens(false)
 		----- IS IN VEHICLE -----
@@ -673,7 +723,7 @@ CreateThread(function()
 
 
 			--- IS EMERG VEHICLE ---
-			if GetVehicleClass(veh) == 18 then
+			if player_is_emerg_driver then
 				if UpdateOnscreenKeyboard() ~= 0 and not IsEntityDead(veh) then
 					--- SET INIT TABLE VALUES ---
 					if state_lxsiren[veh] == nil then
@@ -719,7 +769,6 @@ CreateThread(function()
 									if trailer ~= nil and trailer ~= 0 then
 										SetVehicleSiren(trailer, false)
 									end
-
 								else
 									AUDIO:Play('On', AUDIO.on_volume) -- On
 									--	SET NUI IMAGES
@@ -732,28 +781,27 @@ CreateThread(function()
 								end
 								AUDIO:ResetActivityTimer()
 							------ TOG LX SIREN ------
-							elseif IsDisabledControlJustReleased(0, 19) and not (IsControlPressed(0, 131) and LVC.rumbler_enabled) then
+							elseif IsDisabledControlJustReleased(0, 19) then
 								if state_lxsiren[veh] == 0 then
 									if IsVehicleSirenOn(veh) then
 										local new_tone = nil
 										AUDIO:Play('Upgrade', AUDIO.upgrade_volume)
-										HUD:SetItemState('siren', true)
 										if LVC.reset_standby then
 											if MCTRL:GetSirenMode() == MCTRL.RUMBLER then
 												MCTRL:SetSirenMode(1)
 											end
 											new_tone = UTIL:GetNextSirenTone(0, veh, true)
-											SetLxSirenStateForVeh(veh, new_tone)
 										else
 											--	GET THE SAVED TONE VERIFY IT IS APPROVED, AND NOT DISABLED / BUTTON ONLY
 											local option = UTIL:GetToneOption(LVC.Main_Mem)
 											if option ~= 3 and option ~= 4 then
-												SetLxSirenStateForVeh(veh, LVC.Main_Mem)
+												new_tone = LVC.Main_Mem
 											else
 												new_tone = UTIL:GetNextSirenTone(0, veh, true)
-												SetLxSirenStateForVeh(veh, new_tone)
 											end
 										end
+										SetLxSirenStateForVeh(veh, new_tone)
+										HUD:SetItemState('siren', true)
 									end
 								else
 									AUDIO:Play('Downgrade', AUDIO.downgrade_volume)
@@ -815,15 +863,15 @@ CreateThread(function()
 								actv_manu = false
 							end
 
-							-- TOG RUMBLER
+							-- TOG RUMBLER (LSHIFT+E)
 							if LVC.rumbler and LVC.rumbler_enabled and IsControlPressed(0, 131) and MCTRL:GetSirenMode() ~= MCTRL.LOCAL then
-								if IsDisabledControlJustReleased(0, 19) and state_lxsiren[veh] > 0 then
+								if IsDisabledControlJustReleased(0, 86) and state_lxsiren[veh] > 0 then
 									MCTRL:SetTempRumblerMode(true)				
 								end
 							end
 							
 							-- HORN
-							if IsDisabledControlPressed(0, 86) then
+							if IsDisabledControlPressed(0, 86) and not (IsControlPressed(0, 131) and LVC.rumbler_enabled) then
 								actv_horn = true
 								AUDIO:ResetActivityTimer()
 								HUD:SetItemState('horn', true)
@@ -973,6 +1021,7 @@ CreateThread(function()
 				end
 			end
 		end
+		main_thread_running = true
 		Wait(0)
 	end
-end)
+end

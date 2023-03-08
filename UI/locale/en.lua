@@ -25,13 +25,13 @@ local Translations = {
 		resource_conflict_frontend = '~b~~h~LVC~h~ ~r~~h~CONFLICT ERROR~h~~s~: RESOURCE CONFLICT. SEE CONSOLE.',
 		resource_conflict_console = '^1LVC ERROR: DETECTED "lux_vehcontrol" RUNNING, THIS CONFLICTS WITH LVC. PLEASE STOP "lux_vehcontrol" AND RESTART LVC.',
 		profile_none_found_frontend = '~b~~h~LVC~h~ ~r~~h~CONFIG ERROR~h~~s~: DEFAULT TABLE MISSING. SEE LOGS. CONTACT SERVER DEVELOPER.',
-		profile_none_found_console = '^1CONFIG ERROR: UNABLE TO FIND A PROFILE FOR \'^3%{game_name}^1\', AND REQUIRED FALLBACK TABLE \'DEFAULT\' IS NOT PRESENT. (https://bit.ly/LVC-CSATS)',
+		profile_none_found_console = '^1CONFIG ERROR: UNABLE TO FIND A PROFILE FOR \'^3%{game_name}^1\', AND REQUIRED FALLBACK TABLE \'DEFAULT\' IS NOT PRESENT. (https://tinyurl.com/missing-default)',
 
 		-- FRONTEND ERRORS --
 		reg_keymap_nil_1 = '~b~~h~LVC~h~ ~r~~h~ERROR 2~h~~s~: Nil value caught.\ndetails: (%{i}, %{proposed_tone}, %{profile_name})',
 		reg_keymap_nil_2 = '~b~~h~LVC~h~ ~r~~h~ERROR 2~h~~s~: Try switching vehicles and switching back OR loading profile settings (if save present).',
 		profile_nil_table_frontend = '~b~~h~LVC~h~ ~r~ERROR: %{tbl} attempted to get profile from nil table. See console.',
-		profile_nil_table_console = '^1LVC(%{ver}) ERROR: %{tbl} attempted to get profile from nil table. This is typically caused by an invalid character or missing { } brace in SIRENS.lua. (https://git.io/JDVhK)',
+		profile_nil_table_console = '^1LVC(%{ver}) ERROR: %{tbl} attempted to get profile from nil table. This is typically caused by an invalid character or missing { } brace in SIRENS.lua. (https://tinyurl.com/nil-table)',
 	},
 	info = {
 		locked = 'Siren Control Box: ~r~Locked',
@@ -219,9 +219,11 @@ local Translations = {
 		ec_fail_load_console = '^3LVC Warning:  The saved control for \'${name}\' is no longer permitted by server developer. Reverting to default. Re-save control profile to remove this error. CONTROL: %{control}',
 		ec_fail_load_frontend = '~b~LVC ~y~Warning: Unable to load control for \'%{name}\'. See console.',
 		ec_save_not_used = '^3LVC Info: found save data that did not align with current Extra Controls configuration. Likely old data that has since been changed by a server developer. You can delete this by re-saving.',
+		ec_controller_support = "Controller Support",
+		ec_controller_support_desc = "Toggles support for controller buttons.",
 		-------------------
 		ei_blackout = 'Blackout',
-		ei_blackout_desc = 'Disabled auto brake lights on stop.',
+		ei_blackout_desc = 'Cuts out headlights, taillights, and brakelights. See `/lvcblackout` and registered controls.',
 		ei_auto_park = 'Auto Park Mode',
 		ei_auto_park_desc = 'How long after being stopped to disable auto brake lights and put vehicle in "park". Options are in minutes. Timer (sec): %{timer}',
 		ei_control_desc = 'LVC Toggle Blackout',

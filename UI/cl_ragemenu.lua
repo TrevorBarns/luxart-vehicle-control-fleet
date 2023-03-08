@@ -406,7 +406,7 @@ CreateThread(function()
 			end)	
 			if MENU.menu_rumbler_options and LVC.rumbler then
 				RageUI.IsVisible(RMenu:Get('lvc', 'rumbler'), function()
-					RageUI.Checkbox('Enabled', 'Toggles controls for rumbler / howler functionality. ~c~(DEFAULT: LSHIFT+LALT)', LVC.rumbler_enabled, {}, {
+					RageUI.Checkbox('Enabled', 'Toggles controls for rumbler / howler functionality. ~c~(DEFAULT: LSHIFT+E)', LVC.rumbler_enabled, {}, {
 						onChecked = function()
 							LVC.rumbler_enabled = true
 						end,
@@ -447,7 +447,7 @@ CreateThread(function()
 						HUD:SetMoveMode(true)
 					end,
 					});
-				RageUI.Slider('Scale', (HUD:GetHudScale()*4), 6, 0.2, 'Change opacity of of the HUD background rectangle.', false, {}, HUD.enabled, {
+				RageUI.Slider('Scale', (HUD:GetHudScale()*4), 6, 0.2, 'Change scale of the HUD.', false, {}, HUD.enabled, {
 					onSliderChange = function(Index)
 						HUD:SetHudScale(Index/4)
 						Citizen.SetTimeout(500, STORAGE.SaveHUDSettings)

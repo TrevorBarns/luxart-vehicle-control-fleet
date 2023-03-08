@@ -363,7 +363,7 @@ function STORAGE:LoadSettings(skip_vcf_id)
 			UTIL:Print('^4LVC ^5STORAGE: ^1vehicle profile name nil.', true)
 		end
 	else
-		UTIL:Print('^4LVC ^5STORAGE: ^3No save present.', true)
+		UTIL:Print('^4LVC ^5STORAGE: ^3No profile save present.', true)
 	end
 	UTIL:Print('^4LVC ^5STORAGE: ^7Finished Loading Settings...', true)
 end
@@ -468,4 +468,17 @@ AddEventHandler('lvc:SendVCFs_c', function(VCFs_table)
 	VCFs = VCFs_table
 	VCFs.set = true
 	STORAGE:SetBackupTable()
+	-- Preload as many banks as we can up to 7, reduce wait time on initial siren activation.
+	for _, VCF in pairs(VCFs) do
+		if type(VCF) == 'table' then
+			for _, tone in pairs(VCF.HORNS) do
+				ReqAudioBank(tone.Bank)
+				ReqAudioBank(tone.RumblerBank)
+			end		
+			for _, tone in pairs(VCF.SIRENS) do
+				ReqAudioBank(tone.Bank)
+				ReqAudioBank(tone.RumblerBank)
+			end
+		end
+	end
 end)

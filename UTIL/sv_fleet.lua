@@ -59,7 +59,7 @@ end)
 local curr_version = semver(GetResourceMetadata(GetCurrentResourceName(), 'version', 0))
 local beta_checking = GetResourceMetadata(GetCurrentResourceName(), 'beta_checking', 0) == 'true'
 local experimental = GetResourceMetadata(GetCurrentResourceName(), 'experimental', 0) == 'true' 
-local debug_mode = GetResourceMetadata(GetCurrentResourceName(), 'debug_mode', 0) == 'true' 
+local debug_mode = GetResourceMetadata(GetCurrentResourceName(), 'debug_mode_server', 0) == 'true' 
 local repo_version = ''
 local repo_beta_version = ''
 
@@ -67,15 +67,23 @@ local plugin_count = 0
 local plugins_cv = { }		-- table of active plugins current versions plugins_cv = { ['<pluginname>'] = <version> }
 local plugins_rv = { }		-- table of active plugins repository versions
 
+local function SortAlphabetically(a, b)
+	if a.name > b.name then
+		return false
+	else
+		return true
+	end
+end
+
 --FLEET VARS
 local XML = { }
 local VCFs = { }
 
-
 RegisterServerEvent('lvc:plugins_storePluginVersion')
 AddEventHandler('lvc:plugins_storePluginVersion', function(name, version)
 	plugin_count = plugin_count + 1
-	plugins_cv[name] = version
+	table.insert(plugins_cv, { name = name, version = version } )
+	table.insert(plugins_rv, { name = name, version = nil } )
 end)
 
 RegisterServerEvent('lvc:GetVCFs_s')
@@ -108,22 +116,24 @@ CreateThread( function()
 	TriggerEvent('lvc:plugins_getVersions')
 
   -- Get repo version for installed plugins
-	for name, _ in pairs(plugins_cv) do
-		PerformHttpRequest('https://raw.githubusercontent.com/TrevorBarns/luxart-vehicle-control-extras/master/Plugins/'..name..'/version', function(err, responseText, headers)
+	for i, plugin in ipairs(plugins_cv) do
+		PerformHttpRequest('https://raw.githubusercontent.com/TrevorBarns/luxart-vehicle-control-extras/master/Plugins/'..plugin.name..'/version', function(err, responseText, headers)
 			if responseText ~= nil and responseText ~= '' then
-				plugins_rv[name] = responseText:gsub('\n', '')
+				plugins_rv[i].version = responseText:gsub('\n', '')
 			else
-				plugins_rv[name] = 'UNKWN'
+				plugins_rv[i].version = 'UNKWN'
 			end
 		end)
 	end
 	Wait(1000)
+	table.sort(plugins_cv, SortAlphabetically)
+	table.sort(plugins_rv, SortAlphabetically)
 	print('\n\t^7 ______________________________________________________________')
 	print('\t|\t^8         __                       ^9___                  ^7|')
 	print('\t|\t^8        / /      ^7 /\\   /\\        ^9/ __\\                 ^7|')
 	print('\t|\t^8       / /        ^7\\ \\ / /       ^9/ /                    ^7|')
 	print('\t|\t^8      / /___       ^7\\ V /       ^9/ /___                  ^7|')
-	print('\t|\t^8      \\____/uxart   ^7\\_/ ehicle ^9\\____/ontrol            ^7|')
+	print('\t|\t^8      \\____/uxart   ^7\\_/ehicle  ^9\\____/ontrol            ^7|')
 	print('\t|\t^4                  FLEET EDITION                        ^7|')
 	print(('\t|\t               COMMUNITY ID: %-26s|'):format(SETTINGS.community_id))
 	print(('\t|\t              INSTALLED: %-30s|'):format(curr_version))
@@ -167,14 +177,17 @@ CreateThread( function()
 				if plugin_count > 0 then
 					print('\t^7|______________________________________________________________|')
 					print('\t^7|INSTALLED PLUGINS                     | INSTALLED |  LATEST   |')
-					for name, version in pairs(plugins_cv) do
-						local plugin_string
-						if plugins_rv[name] ~= nil and plugins_rv[name] ~= 'UNKWN' and plugins_cv[name] < plugins_rv[name]  then
-							plugin_string = ('\t|^8  %-36s^7|^8   %s   ^7|^8   %s   ^7|^8 UPDATE REQUIRED    ^7'):format(name, plugins_cv[name], plugins_rv[name])
-						elseif plugins_rv[name] ~= nil and plugins_cv[name] > plugins_rv[name] or plugins_rv[name] == 'UNKWN' then
-							plugin_string = ('\t|^3  %-36s^7|^3   %s   ^7|^3   %s   ^7|^3 EXPERIMENTAL VERSION ^7'):format(name, plugins_cv[name], plugins_rv[name])
+					local plugin_string, current_version, repo_version
+					for i, plugin in ipairs(plugins_cv) do
+						current_version = plugin.version
+						repo_version = plugins_rv[i].version
+						
+						if repo_version ~= nil and repo_version ~= 'UNKWN' and current_version < repo_version  then
+							plugin_string = ('\t|^8  %-36s^7|^8   %s   ^7|^8   %s   ^7|^8 UPDATE REQUIRED    ^7'):format(plugin.name, current_version, repo_version)
+						elseif repo_version ~= nil and current_version > repo_version or repo_version == 'UNKWN' then
+							plugin_string = ('\t|^3  %-36s^7|^3   %s   ^7|^3   %s   ^7|^3 EXPERIMENTAL VERSION ^7'):format(plugin.name, current_version, repo_version)
 						else
-							plugin_string = ('\t|  %-36s|   %s   |   %s   |'):format(name, plugins_cv[name], plugins_rv[name])
+							plugin_string = ('\t|  %-36s|   %s   |   %s   |'):format(plugin.name, current_version, repo_version)
 						end
 						print(plugin_string)
 					end
@@ -203,7 +216,7 @@ CreateThread( function()
 	end
 	print('\t^7|______________________________________________________________|')
 	print('\t^7|      Documentation & Instructions: ^5luxartengineering.com     ^7|')
-	print('\t^7|         Updates, Support, Feedback: ^5discord.link/LVC         ^7|')
+	print('\t^7|       Updates, Support, Feedback: ^5discord.gg/PXQ4T8wB9       ^7|')
 	print('\t^7|______________________________________________________________|\n\n')
 end)
 

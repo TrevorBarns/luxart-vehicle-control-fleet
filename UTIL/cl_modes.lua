@@ -84,7 +84,8 @@ function MCTRL:GetRumblerDurationIndex()
 	return rumbler_duration_index
 end
 
-function MCTRL:SetTempRumblerMode(state)
+function MCTRL:SetTempRumblerMode(state, kill)
+	kill = kill or false
 	if state and siren_mode ~= self.RUMBLER then
 		previous_mode = siren_mode
 		siren_mode = self.RUMBLER
@@ -97,7 +98,9 @@ function MCTRL:SetTempRumblerMode(state)
 			siren_mode = self.NORMAL
 		end
 		AUDIO:Play('Downgrade', AUDIO.downgrade_volume)
-		SetLxSirenStateForVeh(veh, state_lxsiren[veh])
+		if not kill then
+			SetLxSirenStateForVeh(veh, state_lxsiren[veh])
+		end
 	end
 end
 
