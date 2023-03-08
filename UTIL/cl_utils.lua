@@ -137,6 +137,8 @@ function UTIL:UpdateCurrentVCFData(veh, reset)
 	HORNS = profile_data.HORNS
 	SIRENS = profile_data.SIRENS
 
+	-- HUD Options
+	HUD:SetHudState(HUD.enabled)
 	--Rumbler Settings
 	MCTRL:SetRumblerDurationIndex(LVC.rumbler_duration_index)
 	LVC.rumbler_enabled = LVC.rumbler

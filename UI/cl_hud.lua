@@ -40,14 +40,6 @@ CreateThread(function()
 	})
 end)
 
-CreateThread(function()
-	while not VCFs.set do
-		Wait(100)
-	end
-	Wait(500)
-	HUD:SetHudState(HUD.enabled)
-end)
-
 ---------------------------------------------------------------------
 --[[Handles HUD back light control.]]
 CreateThread(function()
