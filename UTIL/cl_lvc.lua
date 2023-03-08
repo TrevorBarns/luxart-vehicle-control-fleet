@@ -268,8 +268,8 @@ end
 CreateThread(function()
 	debug_mode = GetResourceMetadata(GetCurrentResourceName(), 'debug_mode', 0) == 'true'
 	SetNuiFocus( false )
+	UTIL:FixOversizeKeys(SETTINGS.VCF_Assignments)
 
-	RegisterKeyMaps()
 	Wait(100)
 	CreateThread(MainThread)
 	if not SETTINGS.police_scanner then
