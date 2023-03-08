@@ -44,7 +44,8 @@ local profile = nil
 --[[Return sub-table for sirens or plugin settings tables, given veh, and name of whatever setting.]]
 function UTIL:GetProfileFromTable(print_name, tbl, veh, ignore_missing_default)
 	local ignore_missing_default = ignore_missing_default or false
-	local veh_name = GetDisplayNameFromVehicleModel(GetEntityModel(veh))
+	-- Ignore case of gameName
+	local veh_name = string.upper(GetDisplayNameFromVehicleModel(GetEntityModel(veh)))
 	local lead_and_trail_wildcard = veh_name:gsub('%d+', '#')
 	local lead = veh_name:match('%d*%a+')
 	local trail = veh_name:gsub(lead, ''):gsub('%d+', '#')
@@ -96,7 +97,7 @@ end
 function UTIL:FixOversizeKeys(TABLE)
 	for i, tbl in pairs(TABLE) do
 		if string.len(i) > 11 then
-			local shortened_gameName = string.sub(i,1,11)
+			local shortened_gameName = string.upper(string.sub(i,1,11))
 			TABLE[shortened_gameName] = TABLE[i]
 			TABLE[i] = nil
 		end
