@@ -447,7 +447,7 @@ CreateThread(function()
 						HUD:SetMoveMode(true)
 					end,
 					});
-				RageUI.Slider('Scale', (HUD:GetHudScale()*4), 6, 0.2, 'Change opacity of of the HUD background rectangle.', false, {}, HUD.enabled, {
+				RageUI.Slider('Scale', (HUD:GetHudScale()*4), 6, 0.2, 'Change scale of the HUD.', false, {}, HUD.enabled, {
 					onSliderChange = function(Index)
 						HUD:SetHudScale(Index/4)
 						Citizen.SetTimeout(500, STORAGE.SaveHUDSettings)
