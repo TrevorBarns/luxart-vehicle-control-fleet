@@ -34,6 +34,10 @@ SETTINGS.right_signal_key = 83
 SETTINGS.hazard_hold_duration = 750
 --	Time in milliseconds backspace must be pressed to turn on / off hazard lights. 
 
+--------------TURN SIGNALS / HAZARDS---------------
+SETTINGS.police_scanner = false
+--	Enables in game police scanner audio, False: no ai police dispatcher audio. This is apart of the base game.
+
 ------------------PLUG-IN SUPPORT------------------
 SETTINGS.plugins_installed = false
 --	Enabled use of plugins, if installed.

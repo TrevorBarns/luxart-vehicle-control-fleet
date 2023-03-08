@@ -271,6 +271,10 @@ CreateThread(function()
 	Wait(100)
 	local resourceName = string.lower( GetCurrentResourceName() )
 	SendNUIMessage( { _type = 'setResourceName', name = resourceName } )
+	CreateThread(MainThread)
+	if not SETTINGS.police_scanner then
+		SetAudioFlag('PoliceScannerDisabled', true)
+	end
 end)			
 
 ------------------------------------------------
