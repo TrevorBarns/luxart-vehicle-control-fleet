@@ -7,11 +7,16 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Download Dependency
+      - name: Download RageUI
         uses: actions/checkout@v2
         with:
           repository: TrevorBarns/luxart-vehicle-control
           ref: stable
+      - name: Download Plugins
+        uses: actions/checkout@v2
+        with:
+          repository: TrevorBarns/luxart-vehicle-control-extras
+          ref: master
       - name: Lint
         uses: GoatG33k/fivem-lua-lint-action@v1
         with:
