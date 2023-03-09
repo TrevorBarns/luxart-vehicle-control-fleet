@@ -12,9 +12,9 @@ jobs:
         with:
           repository: TrevorBarns/luxart-vehicle-control
           ref: stable
-          path: rageui
+          path: dependencies/RageUI
       - name: Copy Dependency
-        run: cp -r rageui luxart-vehicle-control/dependencies/
+        run: cp -r luxart-vehicle-control/dependencies/RageUI luxart-vehicle-control-fleet/dependencies/RageUI
       - name: Lint
         uses: GoatG33k/fivem-lua-lint-action@v1
         with:
