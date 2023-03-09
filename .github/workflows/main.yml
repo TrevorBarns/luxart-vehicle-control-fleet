@@ -16,7 +16,7 @@ jobs:
         uses: GoatG33k/fivem-lua-lint-action@v1
         with:
           capture: "junit.xml"
-          args: "-t --formatter JUnit --ignore-trailing-whitespace --max-line-length 0"
+          args: "-t --formatter JUnit --no-self --no-max-string-line-length"
       - name: Publish Test Report
         uses: mikepenz/action-junit-report@v2
         with:
