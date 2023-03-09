@@ -50,7 +50,6 @@ AddEventHandler('lvc:TogIndicState_s', function(newstate)
 	TriggerClientEvent('lvc:TogIndicState_c', -1, source, newstate)
 end)
 
-
 ---------------------------------------------------
 -----------------RESROUCE STARTUP------------------
 --------VERSION CHECKING & SERVER PRINTING---------
@@ -88,7 +87,19 @@ end)
 
 RegisterServerEvent('lvc:GetVCFs_s')
 AddEventHandler('lvc:GetVCFs_s', function()
-	TriggerClientEvent('lvc:SendVCFs_c', source, VCFs)
+	local VCFs_copy = table.deepcopy(VCFs)
+	for vcfid, vcf in ipairs(VCFs_copy) do
+		for key, menu_enabled in pairs(vcf.MENU) do
+			if menu_enabled and vcf.PERMS[key] then
+				if IsPlayerAceAllowed(source, 'LVC:Fleet.'..key) then
+					vcf.MENU[key] = true
+				else
+					vcf.MENU[key] = false
+				end
+			end
+		end
+	end
+	TriggerClientEvent('lvc:SendVCFs_c', source, VCFs_copy)
 end)
 
 RegisterServerEvent('lvc:GetRepoVersion_s')
@@ -227,14 +238,15 @@ CreateThread(function()
 	for id, filename in ipairs(SETTINGS.VCF_Files) do	--table of VCF filenames in SETTINGS.lua
 		local data = LoadResourceFile(GetCurrentResourceName(), 'VCF/'..filename)
 		if data then
-			DebugPrint('------------------------------------------------------')			
-			DebugPrint(('-----------------LOADING %s-----------------'):format(filename))			
+			DebugPrint('^3------------------------------------------------------^7')			
+			DebugPrint(('^3-----------------LOADING %s-----------------^7'):format(filename))			
 			local VCF_RAW = parseFile(data)		--XML -> LUA
 			local VCF = XML:RekeyTable(VCF_RAW, filename)	--integer key -> string key
 			VCFs[id] = XML:LoadXMLData(VCF)		--reorganize & casting of var type
-			DebugPrint(('loaded VCF file %s'):format(filename), true)
+			DebugPrint(('^2loaded VCF file %s'):format(filename), true)
 		end
 	end
+	DebugPrint('^3------------------------------------------------------^7')			
 end)
 ---------------------------------------------------
 --Removes tables indexed by integer and replaces with string key
@@ -266,7 +278,7 @@ end
 ---------------------------------------------------
 --reorganizing xmltable into subtables and variable casting
 function XML:LoadXMLData(xmlTable)
-	local AUDIO, HUD, LVC, MENU, HORNS, SIRENS =  { }, { }, { }, { }, { }, { }
+	local AUDIO, HUD, LVC, MENU, PERMS, HORNS, SIRENS =  { }, { }, { }, { }, { }, { }, { }
 	LVC.faction = xmlTable.faction
 	LVC.author = xmlTable.author
 
@@ -276,15 +288,15 @@ function XML:LoadXMLData(xmlTable)
 				local key = v.tag
 				if v[key].Enabled ~= nil then
 					AUDIO[string.lower(key)] = XML:StringToBool(v[key].Enabled)
-					DebugPrint(('AUDIO.%s = %s'):format(string.lower(key), v[key].Enabled))			
+					DebugPrint(('AUDIO.%-34s = %s'):format(string.lower(key), v[key].Enabled))			
 				elseif v[key].Val ~= nil then
 					AUDIO[string.lower(key)] = tonumber(v[key].Val)
-					DebugPrint(('AUDIO.%s = %s'):format(string.lower(key), AUDIO[string.lower(key)]))				
+					DebugPrint(('AUDIO.%-34s = %s'):format(string.lower(key), AUDIO[string.lower(key)]))				
 				elseif key == 'SCHEMES' and v['SCHEMES'] ~= nil then
 					AUDIO.schemes = { }
 					for i, v in pairs(v['SCHEMES']) do
 						AUDIO.schemes[#AUDIO.schemes+1] = v['SCHEME'].String
-						DebugPrint(('AUDIO.%s[%s] = %s'):format('schemes', #AUDIO.schemes, json.encode(AUDIO.schemes[#AUDIO.schemes])))
+						DebugPrint(('AUDIO.%s.%-26s = %s'):format('schemes', #AUDIO.schemes, json.encode(AUDIO.schemes[#AUDIO.schemes])))
 					end		
 				end
 			end
@@ -292,10 +304,10 @@ function XML:LoadXMLData(xmlTable)
 			for key,v in pairs(object) do
 				if key == 'Backlight_Mode' then
 					HUD[string.lower(key)] = tonumber(v)
-					DebugPrint(('HUD.%s = %s'):format(string.lower(key), v))
+					DebugPrint(('HUD.%-36s = %s'):format(string.lower(key), v))
 				else
 					HUD[string.lower(key)] = XML:StringToBool(v)
-					DebugPrint(('HUD.%s = %s'):format(string.lower(key), v))
+					DebugPrint(('HUD.%-36s = %s'):format(string.lower(key), v))
 				end
 			end
 		elseif class == 'SIREN_CONFIG' then
@@ -303,13 +315,13 @@ function XML:LoadXMLData(xmlTable)
 				local key = v.tag
 				if v[key].ToneID ~= nil then
 					LVC[string.lower(key)] = tonumber(v[key].ToneID)
-					DebugPrint(('LVC.%s = %s'):format(string.lower(key), v[key].ToneID))
+					DebugPrint(('LVC.%-36s = %s'):format(string.lower(key), v[key].ToneID))
 				elseif v[key].Enabled ~= nil then
 					LVC[string.lower(key)]  = XML:StringToBool(v[key].Enabled)
-					DebugPrint(('LVC.%s = %s'):format(string.lower(key), v[key].Enabled))
+					DebugPrint(('LVC.%-36s = %s'):format(string.lower(key), v[key].Enabled))
 				elseif v[key].Val ~= nil then
 					LVC[string.lower(key)]  = tonumber(v[key].Val)
-					DebugPrint(('LVC.%s = %s'):format(string.lower(key), v[key].Val))
+					DebugPrint(('LVC.%-36s = %s'):format(string.lower(key), v[key].Val))
 				end
 			end		
 		elseif class == 'TONES' then
@@ -321,7 +333,7 @@ function XML:LoadXMLData(xmlTable)
 				if HORNS[#HORNS].Option ~= nil then
 					HORNS[#HORNS].Option = tonumber(HORNS[#HORNS].Option)
 				end
-				DebugPrint(('HORNS[%s] = %s'):format(#HORNS, json.encode(HORNS[#HORNS])))
+				DebugPrint(('HORNS[%s]  = %s'):format(#HORNS, json.encode(HORNS[#HORNS])))
 			end			
 			for i, v in pairs(object[2]['SIRENS']) do
 				SIRENS[#SIRENS+1] = v['SIREN']
@@ -337,17 +349,39 @@ function XML:LoadXMLData(xmlTable)
 			for _,v in pairs(object) do
 				local key = v.tag
 				if v[key].Enabled ~= nil then
-					MENU[string.lower(key)] = XML:StringToBool(v[key].Enabled)
-					DebugPrint(('MENU.%s = %s'):format(string.lower(key), v[key].Enabled))
+					local lower_key = string.lower(key)
+					MENU[lower_key] = XML:StringToBool(v[key].Enabled)
+					-- ACE PERMISSIONS
+					if v[key].Permissions ~= nil then
+						PERMS[lower_key] = true
+					else
+						PERMS[lower_key] = false
+					end
+					DebugPrint(('MENU.%-35s = %-5s w/perms %s'):format(string.lower(lower_key), v[key].Enabled, PERMS[lower_key]))
 				end
 			end
 		end
 	end
-	return { AUDIO=AUDIO, HUD=HUD, LVC=LVC, MENU=MENU, HORNS=HORNS, SIRENS=SIRENS } 
+	return { AUDIO=AUDIO, HUD=HUD, LVC=LVC, MENU=MENU, PERMS=PERMS, HORNS=HORNS, SIRENS=SIRENS } 
 end
 ---------------------------------------------------
 function DebugPrint(text, override)
 	if debug_mode or override then
 		print(('^4LVC Fleet: ^7%s'):format(text))
 	end
+end
+
+---------------------------------------------------
+function table.deepcopy(orig)
+    local copy
+    if type(orig) == "table" then
+        copy = {}
+        for orig_key, orig_value in next, orig, nil do
+            copy[table.deepcopy(orig_key)] = table.deepcopy(orig_value)
+        end
+        setmetatable(copy, table.deepcopy(getmetatable(orig)))
+    else
+        copy = orig
+    end
+    return copy
 end
