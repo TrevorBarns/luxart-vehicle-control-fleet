@@ -12,10 +12,6 @@ jobs:
         with:
           repository: TrevorBarns/luxart-vehicle-control
           ref: stable
-      - name: List Cloned Repository
-        run: ls -R ../
-      - name: Copy Dependency
-        run: cp -r luxart-vehicle-control/dependencies/RageUI luxart-vehicle-control-fleet/dependencies/
       - name: Lint
         uses: GoatG33k/fivem-lua-lint-action@v1
         with:
