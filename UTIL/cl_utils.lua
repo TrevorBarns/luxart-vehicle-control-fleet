@@ -97,9 +97,15 @@ end
 function UTIL:FixOversizeKeys(TABLE)
 	for i, tbl in pairs(TABLE) do
 		if string.len(i) > 11 then
-			local shortened_gameName = string.upper(string.sub(i,1,11))
-			TABLE[shortened_gameName] = TABLE[i]
+			local new_gameName = string.upper(string.sub(i,1,11))
+			TABLE[new_gameName] = TABLE[i]
 			TABLE[i] = nil
+		else
+			local new_gameName = string.upper(i)
+			if new_gameName ~= i then
+				TABLE[new_gameName] = TABLE[i]
+				TABLE[i] = nil
+			end
 		end
 	end
 end

@@ -33,14 +33,14 @@ CreateThread(function()
 			RageUI.IsVisible(RMenu:Get('lvc', 'plugins'), function()
 				-----------------------------------------------------------------------------------------------------------------
 				if TKDS ~= nil then
-					RageUI.Button(Lang:t('plugins.menu_tkd'), Lang:t('plugins.menu_tkd_desc'), {RightLabel = '→→→'}, TKDS.masterswitch, {
+					RageUI.Button(Lang:t('plugins.menu_tkd'), Lang:t('plugins.menu_tkd_desc'), {RightLabel = '→→→'}, tkd_masterswitch, {
 					  onSelected = function()
 					  end,
 					}, RMenu:Get('lvc', 'tkdsettings'))	
 				end
 				-----------------------------------------------------------------------------------------------------------------
 				if EI ~= nil then
-					RageUI.Button(Lang:t('plugins.menu_ei'), Lang:t('plugins.menu_ei_desc'), {RightLabel = '→→→'}, EI.masterswitch, {
+					RageUI.Button(Lang:t('plugins.menu_ei'), Lang:t('plugins.menu_ei_desc'), {RightLabel = '→→→'}, ei_masterswitch, {
 					  onSelected = function()
 					  end,
 					}, RMenu:Get('lvc', 'extrasettings'))	
@@ -61,7 +61,7 @@ CreateThread(function()
 				end		
 				-----------------------------------------------------------------------------------------------------------------
 				if EC ~= nil then
-					RageUI.Button(Lang:t('plugins.menu_ec'), Lang:t('plugins.menu_ec_desc'), {RightLabel = '→→→'}, EC.masterswitch, {
+					RageUI.Button(Lang:t('plugins.menu_ec'), Lang:t('plugins.menu_ec_desc'), {RightLabel = '→→→'}, ec_masterswitch, {
 					  onSelected = function()
 					  end,
 					}, RMenu:Get('lvc', 'extracontrols'))	
