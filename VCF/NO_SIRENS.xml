@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+	LVC VEHICLE CONFIGURATION FILE
+
+	Vehicles assigned this VCF will be able to use an airhorn and all plugins (i.e. traffic controller),
+	without being able to use any siren functions. The hud will show, but the siren light will not change.
+-->
+<vcfroot Faction="NONE" Author="Christopher M." >
+	<!-- HORN AND SIREN TONES -->
+	<TONES>
+		<HORNS>
+		<!--1==================================================================================================================================================================================================================-->
+			<HORN Name="AIRHORN" 	Option="1"	ResidentString=	"SIRENS_AIRHORN"
+												String=			"" 		Ref=	"" 	Bank= ""
+												RumblerString=	""	RumblerRef=	"" 	RumblerBank=""/>
+		<!--===================================================================================================================================================================================================================-->
+		</HORNS>
+		<SIRENS/>
+	</TONES>
+	<!-- SIREN OPTIONS -->	
+	<SIREN_CONFIG>
+		<Horn ToneID="1"/>
+		<Primary_Manual ToneID="0"/>
+		<Secondary_Manual ToneID="0"/>
+		<Auxiliary ToneID="0"/>
+		<Airhorn_Intrp Enabled="true"/>
+		<Reset_Standby Enabled="true"/>
+		<Park_Kill Enabled="true"/>
+		<Peer_Override Enabled="false"/>
+		<Local_Override Enabled="false"/>
+		<Rumbler Enabled="false"/>
+	</SIREN_CONFIG>
+	<!-- HUD SETTINGS -->	
+	<HUD Enabled="true" Backlight_Mode="1"/>
+	<!-- AUDIO Settings -->
+	<AUDIO>
+		<Radio Enabled="true"/>				
+		<Airhorn_SFX Enabled="true"/>
+		<Manual_SFX Enabled="true"/>
+		<Hazards_SFX Enabled="true"/>
+		<Activity_Reminder_Interval_Index Val="1"/>
+		<Scheme_Index Val="1"/>
+		<SCHEMES>
+			<SCHEME String="SSP2000"/>
+			<SCHEME String="SSP3000"/>
+			<SCHEME String="Cencom"/>
+			<SCHEME String="ST300"/>
+			<SCHEME String="Code3-MCB"/>
+		</SCHEMES>
+		<On_Volume Val="0.5"/>
+		<Off_Volume Val="0.7"/>
+		<Upgrade_Volume Val="0.5"/>
+		<Downgrade_Volume Val="0.7"/>
+		<Hazards_Volume Val="0.09"/>
+		<Activity_Reminder_Volume Val="0.09"/>
+	</AUDIO>
+	<!-- MENU PERMISSIONS -->
+	<MENU>
+		<Menu_Access Enabled='false'/>
+		<Menu_Main_Siren_Settings Enabled="true"/>
+		<Toggle_Peer_Override Enabled="true"/>	
+		<Toggle_Local_Override Enabled="true"/>
+		<Toggle_Airhorn_Intrp Enabled="true"/>
+		<Toggle_Reset_Standby Enabled="true"/>
+		<Custom_Tone_Options Enabled="true"/>
+		<Custom_Manual Enabled="true"/>
+		<Custom_Auxiliary Enabled="true"/>
+		<Toggle_Park_Kill Enabled="true"/>
+		<Menu_HUD_Settings Enabled="true"/>
+		<Toggle_HUD Enabled="true"/>
+		<Custom_Backlight_Mode Enabled="true"/>
+		<Menu_Audio_Settings Enabled="true"/>
+		<Toggle_Radio Enabled="true"/>
+		<Custom_Scheme Enabled="true"/>
+		<Toggle_Clicks Enabled="true"/>
+		<Custom_Activity_Reminder Enabled="true"/>
+		<Menu_Plugins Enabled="true"/>
+	</MENU>
+	<PLUGINS>
+
+	</PLUGINS>
+</vcfroot>
