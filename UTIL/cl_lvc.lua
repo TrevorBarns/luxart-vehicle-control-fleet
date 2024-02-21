@@ -781,7 +781,7 @@ function MainThread()
 								end
 								AUDIO:ResetActivityTimer()
 							------ TOG LX SIREN ------
-							elseif IsDisabledControlJustReleased(0, 19) then
+							elseif IsDisabledControlJustReleased(0, 19) and #SIRENS > 0 then
 								if state_lxsiren[veh] == 0 then
 									if IsVehicleSirenOn(veh) then
 										local new_tone = nil
@@ -815,7 +815,7 @@ function MainThread()
 								AUDIO:ResetActivityTimer()
 								count_broadcast_timer = delay_broadcast_timer
 							-- AUXILIARY
-							elseif IsDisabledControlJustReleased(0, 172) and not IsMenuOpen() then
+							elseif IsDisabledControlJustReleased(0, 172) and not IsMenuOpen() and #SIRENS > 0 then
 								if state_auxiliary[veh] == 0 then
 									if IsVehicleSirenOn(veh) then
 										AUDIO:Play('Upgrade', AUDIO.upgrade_volume)
@@ -833,7 +833,7 @@ function MainThread()
 								count_broadcast_timer = delay_broadcast_timer
 							end
 							-- CYCLE LX SRN TONES
-							if state_lxsiren[veh] > 0 then
+							if state_lxsiren[veh] > 0 and #SIRENS > 0 then
 								if IsDisabledControlJustReleased(0, 80) then
 									AUDIO:Play('Upgrade', AUDIO.upgrade_volume)
 									HUD:SetItemState('horn', false)
@@ -845,7 +845,7 @@ function MainThread()
 							end
 
 							-- MANU
-							if state_lxsiren[veh] < 1 then
+							if state_lxsiren[veh] < 1 and #SIRENS > 0 then
 								if IsDisabledControlPressed(0, 80) then
 									AUDIO:ResetActivityTimer()
 									actv_manu = true
@@ -856,7 +856,7 @@ function MainThread()
 									end
 									actv_manu = false
 								end
-							else
+							elseif #SIRENS > 0 then
 								if actv_manu then
 									HUD:SetItemState('siren', false)
 								end
@@ -864,7 +864,7 @@ function MainThread()
 							end
 
 							-- TOG RUMBLER (LSHIFT+E)
-							if LVC.rumbler and LVC.rumbler_enabled and IsControlPressed(0, 131) and MCTRL:GetSirenMode() ~= MCTRL.LOCAL then
+							if LVC.rumbler and LVC.rumbler_enabled and IsControlPressed(0, 131) and MCTRL:GetSirenMode() ~= MCTRL.LOCAL and #SIRENS > 0 then
 								if IsDisabledControlJustReleased(0, 86) and state_lxsiren[veh] > 0 then
 									MCTRL:SetTempRumblerMode(true)				
 								end
@@ -893,7 +893,7 @@ function MainThread()
 								end
 							end
 
-							if AUDIO.manual_sfx and state_lxsiren[veh] == 0 then
+							if AUDIO.manual_sfx and state_lxsiren[veh] == 0 and #SIRENS > 0 then
 								if IsDisabledControlJustPressed(0, 80) then
 									AUDIO:Play('Press', AUDIO.upgrade_volume)
 								end
