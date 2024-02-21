@@ -45,8 +45,14 @@ SETTINGS.plugins_installed = false
 ---------------------VCF FILES---------------------
 SETTINGS.VCF_Files = {
 	'DEFAULT.xml',
+	'NO_SIRENS.xml',
 }
 
 SETTINGS.VCF_Assignments = {
+	-- Default Horn and Sirens
+	-- E.g. Emergency vehicles
 	['DEFAULT'] = { 1 },
+	-- Default Horn and NO Sirens
+	-- E.g. Non-emergency vehicles with warning lighting, such as tow trucks
+	['NO_SIRENS'] = { 2 },
 }
