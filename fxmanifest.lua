@@ -72,7 +72,6 @@ client_scripts {
     "@RageUI/menu/panels/UIStatisticsPanel.lua",
     "@RageUI/menu/windows/UIHeritage.lua",
 	-------------------------------------
-	'SIRENS.lua',
 	'/UTIL/cl_*.lua',
 	'/UI/cl_*.lua',
 	'/PLUGINS/**/SETTINGS.lua',
