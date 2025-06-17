@@ -77,17 +77,19 @@ local snd_airmanu = {}
 
 local loaded_banks = {}
 
+local update_data = {}
+
 --	Local fn forward declaration
 local RegisterKeyMaps, MakeOrdinal
 
 ----------------THREADED FUNCTIONS----------------
---[[ Configuration checking: conflicting resource, conflicting resource, community ID. 
+--[[ Configuration checking: conflicting resource, conflicting resource, community ID.
 	 player_is_emerg_driver: loop updating vehicle, trailer, checking seat and disabling controls.]]
 CreateThread(function()
 	if not UTIL:IsValidEnviroment() then
 		return
 	end
-	
+
 	Wait(500)
 	while true do
 		playerped = PlayerPedId()
@@ -224,7 +226,7 @@ RegisterCommand('lvcrecovercrash', function()
 				Wait(1)
 			end
 		end)
-		
+
 		if not blocked then
 			test = { test2 = { test3 = 3 } }
 			UTIL:Print("^3LVC Development Log: attempting to recover from a crash... This may not work. Please make a bug report with log file.", true)
@@ -304,7 +306,7 @@ CreateThread(function()
 	if not SETTINGS.police_scanner then
 		SetAudioFlag('PoliceScannerDisabled', true)
 	end
-end)			
+end)
 
 ------------------------------------------------
 -------------------FUNCTIONS--------------------
@@ -314,7 +316,7 @@ function ReqAudioBank(bank)
 	if bank == nil or bank == '' then
 		return
 	end
-	
+
 	while #loaded_banks > 6 do
 		ReleaseNamedScriptAudioBank(loaded_banks[7])
 		ReleaseScriptAudioBank()
@@ -325,7 +327,7 @@ function ReqAudioBank(bank)
 			return
 		end
 	end
-	
+
 	table.insert(loaded_banks, 1, bank)
 	--reformat bank strings for users who format string with XX\\XX due to XML parsing
 	local _, count = string.gsub(bank, "\\", "")
@@ -336,6 +338,21 @@ function ReqAudioBank(bank)
 	RequestScriptAudioBank(bank, false)
 	UTIL:Print(('^4LVC ^5AUDIOBANKS: ^7 Requesting "%s"'):format(bank))
 	Wait(50)
+end
+
+--Broadcast local vehicle state to other resources
+BroadcastPlayerVehicleState = function(vehicle)
+	if veh == vehicle then
+		update_data = {
+			['state_lxsiren'] = state_lxsiren[veh],
+			['state_indic'] = state_indic[veh],
+			['state_pwrcall'] = state_pwrcall[veh],
+			['state_airmanu'] = state_airmanu[veh],
+			['actv_manu'] = actv_manu,
+			['actv_horn'] = actv_horn
+		}
+		TriggerEvent('lvc:UpdateThirdParty', update_data)
+	end
 end
 
 ---------------------------------------------------------------------
@@ -400,6 +417,7 @@ function TogIndicStateForVeh(veh, newstate)
 			SetVehicleIndicatorLights(veh, 1, true) -- L
 		end
 		state_indic[veh] = newstate
+		BroadcastPlayerVehicleState(veh)
 	end
 end
 
@@ -431,7 +449,7 @@ function SetLxSirenStateForVeh(veh, newstate, vcfid, mode_id)
 				ReleaseSoundId(snd_lxsiren[veh])
 				snd_lxsiren[veh] = nil
 			end
-			if newstate ~= 0 then							
+			if newstate ~= 0 then
 				if mode.bank ~= nil and sirens[newstate][mode.bank] ~= nil then
 					ReqAudioBank(sirens[newstate][mode.bank])
 				end
@@ -448,6 +466,7 @@ function SetLxSirenStateForVeh(veh, newstate, vcfid, mode_id)
 			end
 			state_lxsiren[veh] 	= newstate
 			state_mode[veh]		= mode_id
+			BroadcastPlayerVehicleState(veh)
 		end
 	end
 end
@@ -481,6 +500,7 @@ function SetAuxiliaryStateForVeh(veh, newstate, vcfid, mode_id)
 			end
 			state_auxiliary[veh] = newstate
 			state_mode[veh] 	 = newstate
+			BroadcastPlayerVehicleState(veh)
 		end
 	end
 end
@@ -500,7 +520,7 @@ function SetAirManuStateForVeh(veh, newstate, vcfid, horn, mode_id)
 	if horn then
 		horns = VCFs[vcfid].HORNS
 	end
-	
+
 	if DoesEntityExist(veh) and not IsEntityDead(veh) then
 		if newstate ~= state_airmanu[veh] and newstate ~= nil then
 			if snd_airmanu[veh] ~= nil then
@@ -516,7 +536,7 @@ function SetAirManuStateForVeh(veh, newstate, vcfid, horn, mode_id)
 					end
 					if horns[newstate][mode.string] == "" then
 						mode = MCTRL:GetSirenModeTable(MCTRL.NORMAL)
-					end		
+					end
 					PlaySoundFromEntity(snd_airmanu[veh], horns[newstate][mode.string], veh, horns[newstate][mode.ref], 0, 0)
 				else
 					if mode.bank ~= nil and sirens[newstate][mode.bank] ~= nil then
@@ -524,11 +544,12 @@ function SetAirManuStateForVeh(veh, newstate, vcfid, horn, mode_id)
 					end
 					if sirens[newstate][mode.string] == "" then
 						mode = MCTRL:GetSirenModeTable(MCTRL.NORMAL)
-					end						
+					end
 					PlaySoundFromEntity(snd_airmanu[veh], sirens[newstate][mode.string], veh, sirens[newstate][mode.ref], 0, 0)
 				end
 			end
 			state_airmanu[veh] = newstate
+			BroadcastPlayerVehicleState(veh)
 		end
 	end
 end
@@ -576,9 +597,9 @@ AddEventHandler('lvc:SetLxSirenState_c', function(sender, newstate, vcfid, mode)
 				local veh = GetVehiclePedIsUsing(ped_s)
 				-- If the client is using local-override, switch to correct mode.
 				if mode == 3 then
-					mode = 1 
+					mode = 1
 				end
-				
+
 				--Criteria for override enabled, same faction (LE,Fire,etc.) and not 0
 				if MCTRL:GetOverridePeerState() and VCFs[vcfid].LVC.faction == LVC.faction and newstate ~= 0 then
 					if MCTRL:GetSirenMode() == 3 then
@@ -586,12 +607,12 @@ AddEventHandler('lvc:SetLxSirenState_c', function(sender, newstate, vcfid, mode)
 					end
 					--Get peers siren have an assigned fallback position, if assigned
 					local fallback = VCFs[vcfid].SIRENS[newstate].Fallback or nil
-					
+
 					--Use parallel position if available
 					if SIRENS[newstate] ~= nil then
 						UTIL:Print(("using parallel %s, %s, %s").format(newstate, VCF_ID, mode))
 						SetLxSirenStateForVeh(veh, newstate, VCF_ID, mode)
-					--parallel not found, is fallback assigned, otherwise play peers 
+					--parallel not found, is fallback assigned, otherwise play peers
 					elseif SIRENS[fallback] ~= nil then
 						UTIL:Print('using fallback')
 						SetLxSirenStateForVeh(veh, fallback, VCF_ID, mode)
@@ -617,9 +638,9 @@ AddEventHandler('lvc:SetAuxilaryState_c', function(sender, newstate, vcfid, mode
 		if ped_s ~= playerped then
 			if IsPedInAnyVehicle(ped_s, false) then
 				local veh = GetVehiclePedIsUsing(ped_s)
-				
+
 				if mode == 3 then
-					mode = 1 
+					mode = 1
 				end
 				if MCTRL:GetOverridePeerState() and VCFs[vcfid].LVC.faction == LVC.faction and newstate ~= 0 then
 					local fallback = VCFs[vcfid].SIRENS[newstate].Fallback
@@ -647,9 +668,9 @@ AddEventHandler('lvc:SetAirManuState_c', function(sender, newstate, vcfid, using
 		if ped_s ~= playerped then
 			if IsPedInAnyVehicle(ped_s, false) then
 				local veh = GetVehiclePedIsUsing(ped_s)
-				
+
 				if mode == 3 then
-					mode = 1 
+					mode = 1
 				end
 				local fallback = nil
 				if MCTRL:GetOverridePeerState() and VCFs[vcfid].LVC.faction == LVC.faction and newstate ~= 0 then
@@ -658,7 +679,7 @@ AddEventHandler('lvc:SetAirManuState_c', function(sender, newstate, vcfid, using
 					else
 						fallback = VCFs[vcfid].SIRENS[newstate].Fallback or nil
 					end
-					
+
 					if SIRENS[newstate] ~= nil then
 						SetAirManuStateForVeh(veh, newstate, VCF_ID, using_horn, mode)
 					elseif fallback ~= nil and (HORNS[fallback] ~= nil or SIRENS[fallback] ~= nil) then
@@ -682,7 +703,7 @@ function MainThread()
 	while VCF_ID == nil do
 		Wait(100)
 	end
-	
+
 	-- Cached Local Variables
 	local SETTINGS = SETTINGS
 	local HUD = HUD
@@ -690,7 +711,7 @@ function MainThread()
 	local MCTRL = MCTRL
 	local UTIL = UTIL
 	local STORAGE = STORAGE
-	
+
 	while true do
 		--	Crash recovery variable, resets to true at end of loop.
 		main_thread_running = false
@@ -840,7 +861,7 @@ function MainThread()
 									SetLxSirenStateForVeh(veh, UTIL:GetNextSirenTone(state_lxsiren[veh], veh, true))
 									count_broadcast_timer = delay_broadcast_timer
 								elseif IsDisabledControlPressed(0, 80) then
-									HUD:SetItemState('horn', true)	
+									HUD:SetItemState('horn', true)
 								end
 							end
 
@@ -866,10 +887,10 @@ function MainThread()
 							-- TOG RUMBLER (LSHIFT+E)
 							if LVC.rumbler and LVC.rumbler_enabled and IsControlPressed(0, 131) and MCTRL:GetSirenMode() ~= MCTRL.LOCAL then
 								if IsDisabledControlJustReleased(0, 86) and state_lxsiren[veh] > 0 then
-									MCTRL:SetTempRumblerMode(true)				
+									MCTRL:SetTempRumblerMode(true)
 								end
 							end
-							
+
 							-- HORN
 							if IsDisabledControlPressed(0, 86) and not (IsControlPressed(0, 131) and LVC.rumbler_enabled) then
 								actv_horn = true
@@ -880,8 +901,8 @@ function MainThread()
 									HUD:SetItemState('horn', false)
 									actv_horn = false
 								end
-							end	
-		 
+							end
+
 
 							--AIRHORN AND MANU BUTTON SFX
 							if AUDIO.airhorn_sfx and actv_horn or actv_manu then
