@@ -346,7 +346,6 @@ BroadcastPlayerVehicleState = function(vehicle)
 		update_data = {
 			['state_lxsiren'] = state_lxsiren[veh],
 			['state_indic'] = state_indic[veh],
-			['state_pwrcall'] = state_pwrcall[veh],
 			['state_airmanu'] = state_airmanu[veh],
 			['actv_manu'] = actv_manu,
 			['actv_horn'] = actv_horn
