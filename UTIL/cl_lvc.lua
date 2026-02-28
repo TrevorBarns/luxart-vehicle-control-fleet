@@ -317,10 +317,10 @@ function ReqAudioBank(bank)
 		return
 	end
 
-	while #loaded_banks > 6 do
-		ReleaseNamedScriptAudioBank(loaded_banks[7])
+	while #loaded_banks >= SETTINGS.siren_limit do
+		ReleaseNamedScriptAudioBank(loaded_banks[SETTINGS.siren_limit])
 		ReleaseScriptAudioBank()
-		table.remove(loaded_banks, 7)
+		table.remove(loaded_banks, SETTINGS.siren_limit)
 	end
 	for i,v in ipairs(loaded_banks) do
 		if v == bank then

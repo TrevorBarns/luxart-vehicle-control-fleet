@@ -22,6 +22,11 @@ SETTINGS.locked_press_count = 5
 SETTINGS.reminder_rate = 10
 --	How often, in luxart key presses, to remind you that your siren controller is locked.
 
+----------------SIREN LIMIT SETTINGS---------------
+SETTINGS.siren_limit = 7
+-- Currently only 7 audio banks can be loaded at a time due to a game limitation.
+--		If you have other resources that require an audio bank to be loaded you should keep this value under 7.
+
 --------------CUSTOM MANU/HORN/SIREN---------------
 SETTINGS.main_siren_set_register_keys_set_defaults = true
 --	Enables RegisterKeyMapping for all main_allowed_tones and sets the default keys to numrow 1-0.
